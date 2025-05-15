@@ -36,6 +36,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 120,
       progress: 0.6,
+      instructors: [
+        {
+          name: "Dr. Alan Turing",
+          email: "alan.turing@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=11"
+        }
+      ],
       schedule: {
         days: ["Monday", "Wednesday", "Friday"],
         startTime: "9:00 AM",
@@ -55,6 +62,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 85,
       progress: 0.8,
+      instructors: [
+        {
+          name: "Dr. Ada Lovelace",
+          email: "ada.lovelace@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=5"
+        }
+      ],
       schedule: {
         days: ["Tuesday", "Thursday"],
         startTime: "10:30 AM",
@@ -74,6 +88,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 95,
       progress: 0.4,
+      instructors: [
+        {
+          name: "Prof. Emily Dickinson",
+          email: "emily.dickinson@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=9"
+        }
+      ],
       schedule: {
         days: ["Monday", "Wednesday"],
         startTime: "1:30 PM",
@@ -93,6 +114,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 110,
       progress: 0.7,
+      instructors: [
+        {
+          name: "Dr. Howard Zinn",
+          email: "howard.zinn@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=12"
+        }
+      ],
       schedule: {
         days: ["Tuesday", "Thursday"],
         startTime: "2:00 PM",
@@ -112,6 +140,18 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 75,
       progress: 0.5,
+      instructors: [
+        {
+          name: "Dr. Marie Curie",
+          email: "marie.curie@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=6"
+        },
+        {
+          name: "Dr. Richard Feynman",
+          email: "richard.feynman@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=13"
+        }
+      ],
       schedule: {
         days: ["Monday", "Wednesday", "Friday"],
         startTime: "11:00 AM",
@@ -131,6 +171,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 90,
       progress: 0.9,
+      instructors: [
+        {
+          name: "Dr. Linus Pauling",
+          email: "linus.pauling@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=14"
+        }
+      ],
       schedule: {
         days: ["Tuesday", "Thursday"],
         startTime: "8:00 AM",
@@ -150,6 +197,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 65,
       progress: 0.3,
+      instructors: [
+        {
+          name: "Prof. Georgia O'Keeffe",
+          email: "georgia.okeeffe@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=7"
+        }
+      ],
       schedule: {
         days: ["Monday", "Wednesday"],
         startTime: "10:30 AM",
@@ -169,6 +223,13 @@ export const fetchCourses = async (): Promise<Course[]> => {
       year: 2025,
       enrolled: 100,
       progress: 0.6,
+      instructors: [
+        {
+          name: "Dr. Max Weber",
+          email: "max.weber@edugenius.edu",
+          photoURL: "https://i.pravatar.cc/150?img=15"
+        }
+      ],
       schedule: {
         days: ["Friday"],
         startTime: "2:00 PM",
