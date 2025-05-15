@@ -1,4 +1,3 @@
-
 import { User, Course, AIContent } from "@/types";
 
 // Mock function to simulate fetching current user data
@@ -295,4 +294,63 @@ export const fetchCourseById = async (courseId: string): Promise<Course> => {
   }
   
   return course;
+};
+
+// Mock course events
+export const fetchCourseEvents = async (courseId: string) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const events = [
+    {
+      id: "event1",
+      courseId: "course-1",
+      title: "Linear Regression Assignment",
+      type: "assignment",
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      description: "Complete problems 1-5 from Chapter 4"
+    },
+    {
+      id: "event2",
+      courseId: "course-1",
+      title: "Midterm Exam",
+      type: "exam",
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      description: "Covers Chapters 1-5"
+    },
+    {
+      id: "event3",
+      courseId: "course-2",
+      title: "Introduction to Quantum Mechanics",
+      type: "lecture",
+      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
+      description: "Room 302, Physics Building"
+    },
+    {
+      id: "event4",
+      courseId: "course-2",
+      title: "Quantum Physics Quiz",
+      type: "quiz",
+      dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+      description: "15 minutes, online"
+    },
+    {
+      id: "event5",
+      courseId: "course-2",
+      title: "Schrodinger Equation Lab",
+      type: "lab",
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+      description: "Lab Room 201"
+    },
+    {
+      id: "event6",
+      courseId: "course-3",
+      title: "Research Paper Draft",
+      type: "assignment",
+      dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+      description: "Minimum 10 pages, APA format"
+    }
+  ];
+  
+  return events.filter(event => event.courseId === courseId);
 };

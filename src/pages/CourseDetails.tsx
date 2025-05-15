@@ -5,10 +5,11 @@ import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AIDocumentProcessor from "@/components/ai/AIDocumentProcessor";
 import AIToolsCard from "@/components/dashboard/AIToolsCard";
-import { fetchCourseById } from "@/services/mockData";
+import { fetchCourseById, fetchCourseEvents } from "@/services/mockData";
 import { Course } from "@/types";
 import { Book, Calendar } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import CourseEventsList from "@/components/courses/CourseEventsList";
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -119,6 +120,9 @@ const CourseDetails = () => {
               </CardContent>
             </Card>
 
+            {/* Upcoming Events Card */}
+            <CourseEventsList courseId={courseId || ""} />
+
             {/* Grade Prediction Card */}
             {course.progress !== undefined && (
               <Card>
@@ -156,6 +160,22 @@ const CourseDetails = () => {
                 </CardContent>
               </Card>
             )}
+            
+            {/* File Organizer */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <folder-open size={18} className="text-edu-primary" />
+                  Course Files
+                </CardTitle>
+                <CardDescription>
+                  Upload and organize your course materials automatically
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CourseFileOrganizer courseId={courseId || ""} />
+              </CardContent>
+            </Card>
             
             {/* AI Document Processor */}
             <AIDocumentProcessor />

@@ -46,7 +46,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   };
 
   return (
-    <Card className="course-card h-full flex flex-col">
+    <Card className="course-card h-full flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300">
       <div 
         className="h-32 p-4 flex flex-col justify-between text-white"
         style={getBgStyle()}
@@ -77,11 +77,15 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
                 <span className="font-medium">{Math.round(course.progress * 100)}%</span>
               </div>
               <Progress value={course.progress * 100} className="h-2" />
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Predicted Grade</span>
-                <span className={`font-medium ${course.progress >= 0.8 ? 'text-green-500' : course.progress >= 0.6 ? 'text-yellow-500' : 'text-red-500'}`}>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Predicted Grade</span>
+                <div className={`text-xs font-bold px-2 py-1 rounded-md ${
+                  course.progress >= 0.8 ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 
+                  course.progress >= 0.6 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' : 
+                  'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                }`}>
                   {predictGrade(course.progress)}
-                </span>
+                </div>
               </div>
             </div>
           )}
