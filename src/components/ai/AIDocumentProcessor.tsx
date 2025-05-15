@@ -65,7 +65,7 @@ const AIDocumentProcessor: React.FC = () => {
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              <Button as="span" className="cursor-pointer bg-edu-primary hover:bg-edu-primary/90">
+              <Button className="cursor-pointer bg-edu-primary hover:bg-edu-primary/90">
                 Select File
               </Button>
             </label>
