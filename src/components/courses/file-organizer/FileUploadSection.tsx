@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
@@ -33,19 +33,22 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           {isDragging ? "Drop files here" : "Drag and drop files or click to upload"}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Files will be automatically categorized based on content
+          You'll be asked to categorize your files after uploading
         </p>
         
         <div className="mt-4">
-          <Button variant="outline" className="relative">
-            Choose Files
+          <label htmlFor="course-file-upload" className="cursor-pointer">
             <input 
+              id="course-file-upload" 
               type="file" 
-              className="absolute inset-0 opacity-0 cursor-pointer" 
+              className="absolute inset-0 opacity-0 cursor-pointer sr-only" 
               onChange={handleFileUpload} 
               multiple
             />
-          </Button>
+            <Button variant="outline" className="cursor-pointer">
+              Choose Files
+            </Button>
+          </label>
         </div>
       </div>
     </div>

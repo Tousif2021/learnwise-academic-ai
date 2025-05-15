@@ -4,7 +4,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Folder } from "lucide-react";
 import FileUploadSection from "./file-organizer/FileUploadSection";
 import CategoryTabContent from "./file-organizer/CategoryTabContent";
+import FileCategoryDialog from "./file-organizer/FileCategoryDialog";
 import { OrganizedFile, FileCategory } from "./file-organizer/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface CourseFileOrganizerProps {
   courseId: string;
@@ -56,6 +58,9 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
   
   const [activeTab, setActiveTab] = useState<FileCategory>("lectures");
   const [isDragging, setIsDragging] = useState(false);
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const { toast } = useToast();
   
   // File category counts
   const categoryCounts = files.reduce((acc, file) => {
@@ -70,30 +75,58 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
     else return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
   
-  // File categorization utility
-  const categorizeFile = (fileName: string): FileCategory => {
-    const lowerName = fileName.toLowerCase();
-    if (lowerName.includes("lecture")) return "lectures";
-    else if (lowerName.includes("notes")) return "notes";
-    else if (lowerName.includes("exam") || lowerName.includes("quiz")) return "exams";
-    return "miscellaneous";
+  // Handle file upload prompt
+  const handleFileUploadStart = (file: File) => {
+    setPendingFile(file);
+    setIsCategoryDialogOpen(true);
   };
   
-  // Mock file upload handler
+  // Handle multiple files upload
+  const handleFilesUploadStart = (files: FileList) => {
+    if (files.length > 0) {
+      // Process the first file first
+      handleFileUploadStart(files[0]);
+      
+      // Store remaining files for processing after the first one is categorized
+      // In a real app you might want to handle this with a queue system
+      if (files.length > 1) {
+        toast({
+          title: "Multiple files detected",
+          description: `You'll be prompted to categorize each file one by one.`,
+        });
+      }
+    }
+  };
+  
+  // Handle file category selection
+  const handleCategorySelection = (category: FileCategory) => {
+    if (pendingFile) {
+      const newFile: OrganizedFile = {
+        id: `file-${Date.now()}`,
+        name: pendingFile.name,
+        size: pendingFile.size,
+        type: pendingFile.name.split('.').pop() || "",
+        category: category,
+        uploadDate: new Date()
+      };
+      
+      setFiles([...files, newFile]);
+      setPendingFile(null);
+      
+      // Auto switch to the category tab of the uploaded file
+      setActiveTab(category);
+      
+      toast({
+        title: "File uploaded",
+        description: `"${pendingFile.name}" has been added to ${category}.`,
+      });
+    }
+  };
+  
+  // File upload handler from the upload section
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles: OrganizedFile[] = Array.from(e.target.files).map((file, index) => {
-        return {
-          id: `new-file-${Date.now()}-${index}`,
-          name: file.name,
-          size: file.size,
-          type: file.name.split('.').pop() || "",
-          category: categorizeFile(file.name),
-          uploadDate: new Date()
-        };
-      });
-      
-      setFiles([...files, ...newFiles]);
+      handleFilesUploadStart(e.target.files);
     }
   };
   
@@ -112,18 +145,7 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
     setIsDragging(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const newFiles: OrganizedFile[] = Array.from(e.dataTransfer.files).map((file, index) => {
-        return {
-          id: `dropped-file-${Date.now()}-${index}`,
-          name: file.name,
-          size: file.size,
-          type: file.name.split('.').pop() || "",
-          category: categorizeFile(file.name),
-          uploadDate: new Date()
-        };
-      });
-      
-      setFiles([...files, ...newFiles]);
+      handleFilesUploadStart(e.dataTransfer.files);
     }
   };
   
@@ -160,6 +182,14 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
           </TabsContent>
         ))}
       </Tabs>
+      
+      {/* File Category Dialog */}
+      <FileCategoryDialog
+        isOpen={isCategoryDialogOpen}
+        onClose={() => setIsCategoryDialogOpen(false)}
+        fileName={pendingFile?.name || ""}
+        onSelectCategory={handleCategorySelection}
+      />
     </div>
   );
 };

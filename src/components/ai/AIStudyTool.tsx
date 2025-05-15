@@ -160,9 +160,9 @@ const AIStudyTool: React.FC = () => {
         Upload PDF, DOCX, or TXT files to process with our AI study tools
       </p>
       
-      <label htmlFor="file-upload" className="cursor-pointer">
+      <label htmlFor="ai-file-upload" className="cursor-pointer">
         <input
-          id="file-upload"
+          id="ai-file-upload"
           type="file"
           accept=".pdf,.docx,.txt"
           onChange={handleFileUpload}
