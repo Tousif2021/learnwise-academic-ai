@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import CourseDetails from "./pages/CourseDetails";
 import Calendar from "./pages/Calendar";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 // Initialize QueryClient
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/courses/:courseId" element={<CourseDetails />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
