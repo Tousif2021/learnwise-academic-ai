@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ interface FileUploadAreaProps {
 
 const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setFile, resetContent }) => {
   const { toast } = useToast();
+  const [dragActive, setDragActive] = useState(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -28,7 +29,9 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setFile, resetContent }
       
       // Validate file type
       const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
-      if (!['pdf', 'docx', 'txt'].includes(fileExtension || '')) {
+      const validExtensions = ['pdf', 'docx', 'txt'];
+      
+      if (!validExtensions.includes(fileExtension || '')) {
         toast({
           title: "Invalid file type",
           description: "Please upload a PDF, DOCX, or TXT file.",
@@ -50,19 +53,19 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setFile, resetContent }
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.classList.add("border-edu-primary", "bg-edu-primary/5");
+    setDragActive(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.classList.remove("border-edu-primary", "bg-edu-primary/5");
+    setDragActive(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.classList.remove("border-edu-primary", "bg-edu-primary/5");
+    setDragActive(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
@@ -79,7 +82,9 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setFile, resetContent }
       
       // Validate file type
       const fileExtension = droppedFile.name.split('.').pop()?.toLowerCase();
-      if (!['pdf', 'docx', 'txt'].includes(fileExtension || '')) {
+      const validExtensions = ['pdf', 'docx', 'txt'];
+      
+      if (!validExtensions.includes(fileExtension || '')) {
         toast({
           title: "Invalid file type",
           description: "Please upload a PDF, DOCX, or TXT file.",
@@ -100,7 +105,9 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setFile, resetContent }
 
   return (
     <div 
-      className="border-2 border-dashed border-muted rounded-lg p-8 text-center transition-colors"
+      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+        dragActive ? 'border-edu-primary bg-edu-primary/5' : 'border-muted'
+      }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -135,3 +142,4 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ setFile, resetContent }
 };
 
 export default FileUploadArea;
+

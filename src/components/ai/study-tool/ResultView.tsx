@@ -7,7 +7,7 @@ import FlashcardsContent from "../document-processor/FlashcardsContent";
 import MCQsContent from "../document-processor/MCQsContent";
 import ConceptsContent from "../document-processor/ConceptsContent";
 import { AIContent } from "@/types";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 interface ResultViewProps {
   file: File | null;
@@ -42,10 +42,28 @@ const ResultView: React.FC<ResultViewProps> = ({
       </div>
 
       <div className="bg-muted/30 p-4 rounded-lg">
-        {selectedTool === "summary" && <SummaryContent summary={aiContent.summary || ""} />}
-        {selectedTool === "flashcards" && <FlashcardsContent flashcards={aiContent.flashcards || []} />}
-        {selectedTool === "mcqs" && <MCQsContent mcqs={aiContent.mcqs || []} />}
-        {selectedTool === "concepts" && <ConceptsContent concepts={aiContent.keyConcepts || []} />}
+        <Tabs value={selectedTool} defaultValue={selectedTool}>
+          {selectedTool === "summary" && (
+            <TabsContent value="summary">
+              <SummaryContent summary={aiContent.summary || ""} />
+            </TabsContent>
+          )}
+          {selectedTool === "flashcards" && (
+            <TabsContent value="flashcards">
+              <FlashcardsContent flashcards={aiContent.flashcards || []} />
+            </TabsContent>
+          )}
+          {selectedTool === "mcqs" && (
+            <TabsContent value="mcqs">
+              <MCQsContent mcqs={aiContent.mcqs || []} />
+            </TabsContent>
+          )}
+          {selectedTool === "concepts" && (
+            <TabsContent value="concepts">
+              <ConceptsContent concepts={aiContent.keyConcepts || []} />
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
       
       <Button 
@@ -60,3 +78,4 @@ const ResultView: React.FC<ResultViewProps> = ({
 };
 
 export default ResultView;
+

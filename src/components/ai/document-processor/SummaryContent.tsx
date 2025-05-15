@@ -8,12 +8,10 @@ interface SummaryContentProps {
 
 const SummaryContent: React.FC<SummaryContentProps> = ({ summary }) => {
   return (
-    <Tabs defaultValue="summary">
-      <TabsContent value="summary" className="border rounded-md p-4">
-        <h3 className="font-medium mb-2">Document Summary</h3>
-        <p className="text-sm whitespace-pre-line">{summary}</p>
-      </TabsContent>
-    </Tabs>
+    <div className="border rounded-md p-4">
+      <h3 className="font-medium mb-2">Document Summary</h3>
+      <p className="text-sm whitespace-pre-line">{summary}</p>
+    </div>
   );
 };
 

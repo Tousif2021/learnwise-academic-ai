@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
@@ -8,31 +8,40 @@ interface UploadSectionProps {
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
+  const [dragActive, setDragActive] = useState(false);
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.add("border-edu-primary", "bg-edu-primary/5");
+    setDragActive(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.remove("border-edu-primary", "bg-edu-primary/5");
+    setDragActive(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.classList.remove("border-edu-primary", "bg-edu-primary/5");
+    setDragActive(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-      fileInput.files = e.dataTransfer.files;
-      const event = new Event('change', { bubbles: true });
-      fileInput.dispatchEvent(event);
+      if (fileInput) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(e.dataTransfer.files[0]);
+        fileInput.files = dataTransfer.files;
+        
+        const event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+      }
     }
   };
 
   return (
     <div 
-      className="border-2 border-dashed border-muted rounded-lg p-8 text-center transition-colors"
+      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+        dragActive ? 'border-edu-primary bg-edu-primary/5' : 'border-muted'
+      }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -58,8 +67,13 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
           Select File
         </Button>
       </label>
+      
+      <p className="mt-4 text-xs text-muted-foreground">
+        Maximum file size: 10MB
+      </p>
     </div>
   );
 };
 
 export default UploadSection;
+
