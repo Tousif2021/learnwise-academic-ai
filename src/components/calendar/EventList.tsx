@@ -10,7 +10,7 @@ interface EventListProps {
 }
 
 const EventList: React.FC<EventListProps> = ({ date, eventType, limit }) => {
-  const { events, isLoading } = useEvents({ date, type: eventType, limit });
+  const { data: events, isLoading } = useEvents({ date, type: eventType, limit });
   
   if (isLoading) {
     return (
@@ -22,7 +22,7 @@ const EventList: React.FC<EventListProps> = ({ date, eventType, limit }) => {
     );
   }
   
-  if (events.length === 0) {
+  if (!events || events.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>No events scheduled for this {date ? 'date' : 'period'}</p>
