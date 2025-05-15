@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import CourseDetails from "./pages/CourseDetails";
 import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 // Initialize QueryClient
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/courses/:courseId" element={<CourseDetails />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
