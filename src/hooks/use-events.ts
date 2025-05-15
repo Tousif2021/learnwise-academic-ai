@@ -69,6 +69,13 @@ const fetchEvents = async (params: any = {}) => {
   if (params.type) {
     filteredEvents = filteredEvents.filter(event => event.type === params.type);
   }
+
+  // Filter by courseId if provided
+  if (params.courseId) {
+    filteredEvents = filteredEvents.filter(event => 
+      event.course && event.course.id === params.courseId
+    );
+  }
   
   // Limit results if specified
   if (params.limit && params.limit > 0) {

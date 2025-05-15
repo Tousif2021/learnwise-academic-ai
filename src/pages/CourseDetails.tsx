@@ -10,6 +10,7 @@ import { Book, Calendar, FolderOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import CourseEventsList from "@/components/courses/CourseEventsList";
 import CourseFileOrganizer from "@/components/courses/CourseFileOrganizer";
+import AddCourseEventButton from "@/components/courses/AddCourseEventButton";
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -160,10 +161,26 @@ const CourseDetails = () => {
               </CardContent>
             </Card>
             
-            {/* Upcoming Events Card - moved below instructor card */}
-            <CourseEventsList courseId={courseId || ""} />
+            {/* Upcoming Events Card with Add Event Button */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar size={18} className="text-edu-primary" />
+                    Course Events
+                  </CardTitle>
+                  <CardDescription>
+                    Upcoming assignments, quizzes, and deadlines
+                  </CardDescription>
+                </div>
+                <AddCourseEventButton courseId={courseId || ""} />
+              </CardHeader>
+              <CardContent>
+                <CourseEventsList courseId={courseId || ""} />
+              </CardContent>
+            </Card>
 
-            {/* Grade Prediction Card - moved below upcoming events */}
+            {/* Grade Prediction Card */}
             {course.progress !== undefined && (
               <Card>
                 <CardHeader>

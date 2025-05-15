@@ -57,9 +57,15 @@ interface AddEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   courses: Course[];
+  preselectedCourseId?: string;
 }
 
-const AddEventDialog: React.FC<AddEventDialogProps> = ({ open, onOpenChange, courses }) => {
+const AddEventDialog: React.FC<AddEventDialogProps> = ({ 
+  open, 
+  onOpenChange, 
+  courses,
+  preselectedCourseId 
+}) => {
   const { addEvent, isAdding } = useAddEvent();
   
   const form = useForm<FormValues>({
@@ -67,6 +73,7 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({ open, onOpenChange, cou
     defaultValues: {
       title: "",
       type: "assignment",
+      courseId: preselectedCourseId || "",
       dueDate: new Date(),
       time: format(new Date(), "HH:mm"),
       description: "",
@@ -111,6 +118,13 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({ open, onOpenChange, cou
       });
     }
   };
+  
+  // Initialize the form with preselected course when the dialog opens
+  React.useEffect(() => {
+    if (open && preselectedCourseId) {
+      form.setValue('courseId', preselectedCourseId);
+    }
+  }, [open, preselectedCourseId, form]);
   
   const eventTypes = [
     { value: "assignment", label: "Assignment" },
@@ -177,8 +191,8 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({ open, onOpenChange, cou
                 name="courseId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Course (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Course</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select course" />
