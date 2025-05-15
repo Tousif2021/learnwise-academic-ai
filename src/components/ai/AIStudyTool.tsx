@@ -16,6 +16,7 @@ import SummaryContent from "./document-processor/SummaryContent";
 import FlashcardsContent from "./document-processor/FlashcardsContent";
 import MCQsContent from "./document-processor/MCQsContent";
 import ConceptsContent from "./document-processor/ConceptsContent";
+import { useToast } from "@/hooks/use-toast";
 
 type ToolType = "summary" | "flashcards" | "mcqs" | "concepts";
 
@@ -31,6 +32,7 @@ const AIStudyTool: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiContent, setAiContent] = useState<AIContent | null>(null);
   const [selectedTool, setSelectedTool] = useState<ToolType | null>(null);
+  const { toast } = useToast();
 
   const tools: ToolOption[] = [
     {
@@ -61,29 +63,55 @@ const AIStudyTool: React.FC = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
       // Reset any previous results
       setAiContent(null);
       setSelectedTool(null);
+      
+      toast({
+        title: "File uploaded",
+        description: `${selectedFile.name} has been uploaded successfully.`,
+      });
     }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
+      const droppedFile = e.dataTransfer.files[0];
+      setFile(droppedFile);
       // Reset any previous results
       setAiContent(null);
       setSelectedTool(null);
+      
+      toast({
+        title: "File uploaded",
+        description: `${droppedFile.name} has been uploaded successfully.`,
+      });
     }
   };
 
   const processTool = async (toolType: ToolType) => {
-    if (!file) return;
+    if (!file) {
+      toast({
+        title: "No file selected",
+        description: "Please upload a file first.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsProcessing(true);
     setSelectedTool(toolType);
@@ -93,8 +121,18 @@ const AIStudyTool: React.FC = () => {
       // Here we're just using mock data based on the filename
       const content = await generateAIContent(file.name);
       setAiContent(content);
+      
+      toast({
+        title: "Processing complete",
+        description: `Your file has been processed using the ${toolType} tool.`,
+      });
     } catch (error) {
       console.error("Error processing document:", error);
+      toast({
+        title: "Processing failed",
+        description: "There was an error processing your document.",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -110,6 +148,7 @@ const AIStudyTool: React.FC = () => {
     <div 
       className="border-2 border-dashed border-muted rounded-lg p-8 text-center"
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <div className="mx-auto w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mb-4">
@@ -121,7 +160,7 @@ const AIStudyTool: React.FC = () => {
         Upload PDF, DOCX, or TXT files to process with our AI study tools
       </p>
       
-      <label htmlFor="file-upload">
+      <label htmlFor="file-upload" className="cursor-pointer">
         <input
           id="file-upload"
           type="file"
