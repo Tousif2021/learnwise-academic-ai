@@ -86,7 +86,7 @@ const CourseDetails = () => {
             <div className="flex flex-wrap gap-4 mt-2">
               <div className="flex items-center gap-1 text-sm">
                 <Book size={14} />
-                <span>{course.department}</span>
+                <span>{course.institution}</span>
               </div>
               <div className="flex items-center gap-1 text-sm">
                 <Users size={14} />
@@ -130,10 +130,10 @@ const CourseDetails = () => {
               <CardContent>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    {course.instructor.charAt(0)}
+                    {course.instructors[0]?.name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-medium">{course.instructor}</h3>
+                    <h3 className="font-medium">{course.instructors[0]?.name}</h3>
                     <p className="text-sm text-muted-foreground">Professor</p>
                   </div>
                 </div>
