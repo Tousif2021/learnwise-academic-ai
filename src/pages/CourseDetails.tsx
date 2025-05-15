@@ -120,10 +120,50 @@ const CourseDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Upcoming Events Card */}
+            {/* AI Study Tool - moved to appear right after the course description */}
+            <AIStudyTool />
+            
+            {/* File Organizer */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FolderOpen size={18} className="text-edu-primary" />
+                  Course Files
+                </CardTitle>
+                <CardDescription>
+                  Upload and organize your course materials automatically
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CourseFileOrganizer courseId={courseId || ""} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Instructor Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Instructor</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    {course.instructors[0]?.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{course.instructors[0]?.name}</h3>
+                    <p className="text-sm text-muted-foreground">Professor</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Upcoming Events Card - moved below instructor card */}
             <CourseEventsList courseId={courseId || ""} />
 
-            {/* Grade Prediction Card */}
+            {/* Grade Prediction Card - moved below upcoming events */}
             {course.progress !== undefined && (
               <Card>
                 <CardHeader>
@@ -160,46 +200,6 @@ const CourseDetails = () => {
                 </CardContent>
               </Card>
             )}
-            
-            {/* File Organizer */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FolderOpen size={18} className="text-edu-primary" />
-                  Course Files
-                </CardTitle>
-                <CardDescription>
-                  Upload and organize your course materials automatically
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CourseFileOrganizer courseId={courseId || ""} />
-              </CardContent>
-            </Card>
-            
-            {/* AI Study Tool - replaces AI Document Processor */}
-            <AIStudyTool />
-          </div>
-
-          {/* Sidebar - we're removing AIToolsCard as it's redundant now */}
-          <div className="space-y-6">
-            {/* Instructor Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Instructor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    {course.instructors[0]?.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{course.instructors[0]?.name}</h3>
-                    <p className="text-sm text-muted-foreground">Professor</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
