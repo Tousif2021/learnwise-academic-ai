@@ -48,7 +48,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 to="/courses" 
                 icon={<Book size={18} />} 
                 label="Courses" 
-                active={location.pathname.includes('/courses')} 
+                active={location.pathname === '/courses' || location.pathname.startsWith('/courses/')} 
               />
               <SidebarLink 
                 to="/calendar" 

@@ -48,9 +48,11 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">My Courses</h2>
-                <Button size="sm" variant="outline" className="gap-1">
-                  <Plus size={16} />
-                  <span>Add Course</span>
+                <Button size="sm" variant="outline" className="gap-1" asChild>
+                  <Link to="/courses">
+                    <Plus size={16} />
+                    <span>Add Course</span>
+                  </Link>
                 </Button>
               </div>
               
