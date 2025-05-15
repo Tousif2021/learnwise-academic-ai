@@ -1,9 +1,9 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AIDocumentProcessor from "@/components/ai/AIDocumentProcessor";
-import AIToolsCard from "@/components/dashboard/AIToolsCard";
+import AIStudyTool from "@/components/ai/AIStudyTool";
 import { fetchCourseById } from "@/services/mockData";
 import { Course } from "@/types";
 import { Book, Calendar, FolderOpen } from "lucide-react";
@@ -177,15 +177,12 @@ const CourseDetails = () => {
               </CardContent>
             </Card>
             
-            {/* AI Document Processor */}
-            <AIDocumentProcessor />
+            {/* AI Study Tool - replaces AI Document Processor */}
+            <AIStudyTool />
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - we're removing AIToolsCard as it's redundant now */}
           <div className="space-y-6">
-            {/* AI Tools Card */}
-            <AIToolsCard />
-
             {/* Instructor Information */}
             <Card>
               <CardHeader>
