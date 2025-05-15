@@ -1,13 +1,98 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import AppLayout from "@/components/layout/AppLayout";
+import WelcomeCard from "@/components/dashboard/WelcomeCard";
+import CourseCard from "@/components/dashboard/CourseCard";
+import AIToolsCard from "@/components/dashboard/AIToolsCard";
+import UpcomingTasksCard from "@/components/dashboard/UpcomingTasksCard";
+import AIDocumentProcessor from "@/components/ai/AIDocumentProcessor";
+import { fetchCurrentUser, fetchCourses } from "@/services/mockData";
+import { User, Course } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const Index = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Fetch user and courses data
+        const userData = await fetchCurrentUser();
+        const coursesData = await fetchCourses();
+        
+        setUser(userData);
+        setCourses(coursesData);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <AppLayout>
+      <div className="max-w-7xl mx-auto">
+        {/* Welcome Section */}
+        <WelcomeCard user={user} />
+        
+        {/* Main Dashboard Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          {/* Left Column - Courses */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Courses Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">My Courses</h2>
+                <Button size="sm" variant="outline" className="gap-1">
+                  <Plus size={16} />
+                  <span>Add Course</span>
+                </Button>
+              </div>
+              
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-64 bg-muted rounded-xl animate-pulse"></div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {courses.slice(0, 4).map((course) => (
+                    <Link to={`/courses/${course.id}`} key={course.id}>
+                      <CourseCard course={course} />
+                    </Link>
+                  ))}
+                </div>
+              )}
+              
+              {courses.length > 4 && (
+                <div className="mt-4 text-center">
+                  <Link to="/courses">
+                    <Button variant="link">View all {courses.length} courses</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+            
+            {/* AI Document Processor */}
+            <AIDocumentProcessor />
+          </div>
+          
+          {/* Right Column - AI Tools and Tasks */}
+          <div className="space-y-6">
+            <AIToolsCard />
+            <UpcomingTasksCard />
+          </div>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
