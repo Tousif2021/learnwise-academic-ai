@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { generateAIContent } from "@/services/mockData";
 import { AIContent } from "@/types";
 import { 
   BookOpen, 
@@ -77,10 +76,63 @@ const AIStudyTool: React.FC = () => {
     setSelectedTool(toolType);
     
     try {
-      // In a real application, we would upload the file to a server and process it
-      // Here we're just using mock data based on the filename
-      const content = await generateAIContent(file.name);
-      setAiContent(content);
+      // Simulate processing with a delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Generate synthetic content based on the tool selected
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      
+      const newContent: AIContent = {
+        id: `ai-content-${Date.now()}`,
+        courseContentId: `content-${Date.now()}`,
+        summary: toolType === "summary" ? 
+          `This is an AI-generated summary of "${file.name}". The document appears to be a ${fileExtension === 'pdf' ? 'PDF document' : fileExtension === 'docx' ? 'Word document' : 'text file'} containing academic content with key concepts and methodologies in your field of study. The document discusses theoretical frameworks and practical applications, with references to recent research in the field.` : 
+          "",
+        flashcards: toolType === "flashcards" ? [
+          { question: "What is the main topic of this document?", answer: "The main topic is related to academic concepts in your course." },
+          { question: "What theoretical framework is discussed?", answer: "Several theoretical frameworks are discussed, including conceptual models and analytical approaches." },
+          { question: "What are the key applications mentioned?", answer: "The document mentions applications in research, education, and professional practice." },
+          { question: "What research methods are discussed?", answer: "Both qualitative and quantitative research methods are covered, with emphasis on data analysis techniques." },
+          { question: "What are the limitations mentioned?", answer: "The document acknowledges limitations in current approaches and suggests areas for future research." }
+        ] : [],
+        mcqs: toolType === "mcqs" ? [
+          {
+            question: "What is the primary focus of this document?",
+            options: ["Academic theory", "Practical applications", "Research methodology", "Historical context"],
+            correctOption: 0,
+            explanation: "The document primarily focuses on academic theory with supporting evidence."
+          },
+          {
+            question: "Which research approach is NOT discussed in the document?",
+            options: ["Qualitative analysis", "Quantitative methods", "Mixed methods", "Archaeological excavation"],
+            correctOption: 3,
+            explanation: "Archaeological excavation is not relevant to this academic context and is not discussed."
+          },
+          {
+            question: "According to the document, what is essential for effective learning?",
+            options: ["Memorization only", "Critical thinking and application", "Watching videos", "Taking tests"],
+            correctOption: 1,
+            explanation: "The document emphasizes the importance of critical thinking and practical application of concepts."
+          },
+          {
+            question: "Which of these concepts is emphasized most in the document?",
+            options: ["Theoretical foundations", "Social media influence", "Entertainment value", "Political perspectives"],
+            correctOption: 0,
+            explanation: "The document places strong emphasis on theoretical foundations as the basis for further understanding."
+          }
+        ] : [],
+        keyConcepts: toolType === "concepts" ? [
+          { concept: "Theoretical Framework", description: "The underlying structure of concepts, theories, and relationships that supports a research study or academic discourse." },
+          { concept: "Methodology", description: "The systematic approach to research, including data collection and analysis techniques." },
+          { concept: "Critical Analysis", description: "The process of evaluating information through careful examination of available evidence." },
+          { concept: "Practical Application", description: "The implementation of theoretical concepts in real-world situations." },
+          { concept: "Research Ethics", description: "The principles that guide responsible conduct in research activities." },
+          { concept: "Data Interpretation", description: "The process of making sense of collected data and drawing meaningful conclusions." }
+        ] : [],
+        generatedAt: new Date()
+      };
+      
+      setAiContent(newContent);
       
       toast({
         title: "Processing complete",

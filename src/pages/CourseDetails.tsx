@@ -1,38 +1,88 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AIStudyTool from "@/components/ai/AIStudyTool";
-import { fetchCourseById } from "@/services/mockData";
 import { Course } from "@/types";
 import { Book, Calendar, FolderOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import CourseEventsList from "@/components/courses/CourseEventsList";
 import CourseFileOrganizer from "@/components/courses/CourseFileOrganizer";
 import AddCourseEventButton from "@/components/courses/AddCourseEventButton";
+import { useToast } from "@/hooks/use-toast";
+
+// Sample course data (in a real app, this would come from an API)
+const sampleCourse: Course = {
+  id: "course-1",
+  code: "CS101",
+  title: "Introduction to Computer Science",
+  description: "An introductory course to the fundamental concepts of computer science. This course covers basic programming concepts, algorithms, data structures, and computational thinking. Students will learn problem-solving approaches, debugging techniques, and the foundations of software development. The course is designed to provide a solid foundation for further study in computer science and related fields.",
+  institution: "Online University",
+  semester: "fall",
+  year: 2025,
+  enrolled: 120,
+  progress: 0.2,
+  instructors: [
+    {
+      name: "Dr. Alan Turing",
+      email: "alan.turing@online.edu",
+      photoURL: "https://i.pravatar.cc/150?img=11"
+    }
+  ],
+  schedule: {
+    days: ["Monday", "Wednesday", "Friday"],
+    startTime: "9:00 AM",
+    endTime: "10:00 AM",
+    location: "Building A, Room 101"
+  },
+  color: "#2563eb",
+  createdAt: new Date(),
+};
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
+    // Simulate API loading
     const loadCourse = async () => {
       try {
-        if (courseId) {
-          const courseData = await fetchCourseById(courseId);
-          setCourse(courseData);
+        // In a real app, fetch course data from an API
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // For demo purposes: either use sample data or simulate not found
+        if (courseId === "course-1") {
+          setCourse(sampleCourse);
+        } else {
+          // Create a new course based on the courseId
+          const newCourse = {
+            ...sampleCourse,
+            id: courseId || "unknown",
+            title: courseId === "course-2" ? "Calculus II" : `Course ${courseId}`,
+            code: courseId === "course-2" ? "MATH201" : `CODE${courseId?.slice(-3)}`,
+            color: courseId === "course-2" ? "#db2777" : "#16a34a",
+            progress: Math.random(),
+          };
+          setCourse(newCourse);
         }
       } catch (error) {
         console.error("Error loading course:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load course details.",
+          variant: "destructive",
+        });
+        setCourse(null);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadCourse();
-  }, [courseId]);
+  }, [courseId, toast]);
 
   // Predict grade based on progress
   const predictGrade = (progress: number) => {

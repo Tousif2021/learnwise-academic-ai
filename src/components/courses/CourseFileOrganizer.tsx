@@ -13,49 +13,7 @@ interface CourseFileOrganizerProps {
 }
 
 const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) => {
-  const [files, setFiles] = useState<OrganizedFile[]>([
-    {
-      id: "file1",
-      name: "Lecture 1 - Introduction.pdf",
-      size: 1500000,
-      type: "pdf",
-      category: "lectures",
-      uploadDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: "file2",
-      name: "My Chapter 2 Notes.docx",
-      size: 350000,
-      type: "docx",
-      category: "notes",
-      uploadDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: "file3",
-      name: "Practice Exam 2020.pdf",
-      size: 2100000,
-      type: "pdf",
-      category: "exams",
-      uploadDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: "file4",
-      name: "Lecture 2 - Advanced Topics.pdf",
-      size: 1800000,
-      type: "pdf",
-      category: "lectures",
-      uploadDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: "file5",
-      name: "Class Syllabus.pdf",
-      size: 500000,
-      type: "pdf",
-      category: "miscellaneous",
-      uploadDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    }
-  ]);
-  
+  const [files, setFiles] = useState<OrganizedFile[]>([]);
   const [activeTab, setActiveTab] = useState<FileCategory>("lectures");
   const [isDragging, setIsDragging] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
@@ -77,6 +35,16 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
   
   // Handle file upload prompt
   const handleFileUploadStart = (file: File) => {
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select a file smaller than 50MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setPendingFile(file);
     setIsCategoryDialogOpen(true);
   };
@@ -148,6 +116,15 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
       handleFilesUploadStart(e.dataTransfer.files);
     }
   };
+
+  // Delete file handler
+  const handleDeleteFile = (fileId: string) => {
+    setFiles(files.filter(file => file.id !== fileId));
+    toast({
+      title: "File deleted",
+      description: "The file has been removed successfully.",
+    });
+  };
   
   return (
     <div className="space-y-4">
@@ -178,6 +155,7 @@ const CourseFileOrganizer: React.FC<CourseFileOrganizerProps> = ({ courseId }) =
               category={category}
               formatFileSize={formatFileSize}
               handleFileUpload={handleFileUpload}
+              onDeleteFile={handleDeleteFile}
             />
           </TabsContent>
         ))}

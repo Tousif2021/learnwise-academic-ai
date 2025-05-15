@@ -10,6 +10,7 @@ interface CategoryTabContentProps {
   category: FileCategory;
   formatFileSize: (bytes: number) => string;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDeleteFile?: (fileId: string) => void;
 }
 
 const CategoryTabContent: React.FC<CategoryTabContentProps> = ({
@@ -17,6 +18,7 @@ const CategoryTabContent: React.FC<CategoryTabContentProps> = ({
   category,
   formatFileSize,
   handleFileUpload,
+  onDeleteFile
 }) => {
   const filteredFiles = files
     .filter(file => file.category === category)
@@ -31,6 +33,7 @@ const CategoryTabContent: React.FC<CategoryTabContentProps> = ({
               key={file.id}
               file={file}
               formatFileSize={formatFileSize}
+              onDelete={onDeleteFile ? () => onDeleteFile(file.id) : undefined}
             />
           ))}
         </div>
@@ -45,6 +48,7 @@ const CategoryTabContent: React.FC<CategoryTabContentProps> = ({
               className="absolute inset-0 opacity-0 cursor-pointer" 
               onChange={handleFileUpload} 
               multiple
+              accept=".pdf,.docx,.txt,.pptx"
             />
           </Button>
         </div>

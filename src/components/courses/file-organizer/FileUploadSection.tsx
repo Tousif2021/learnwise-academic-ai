@@ -44,6 +44,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
               className="absolute inset-0 opacity-0 cursor-pointer sr-only" 
               onChange={handleFileUpload} 
               multiple
+              accept=".pdf,.docx,.txt,.pptx"
             />
             <Button variant="outline" className="cursor-pointer">
               Choose Files

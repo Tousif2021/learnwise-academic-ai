@@ -1,38 +1,89 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import CourseCard from "@/components/dashboard/CourseCard";
 import UpcomingTasksCard from "@/components/dashboard/UpcomingTasksCard";
-import { fetchCurrentUser, fetchCourses } from "@/services/mockData";
 import { User, Course } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import AIToolsCard from "@/components/dashboard/AIToolsCard";
+
+// Sample user data (in a real app, this would come from authentication)
+const sampleUser: User = {
+  id: "user-1",
+  displayName: "Guest User",
+  email: "guest@example.com",
+  photoURL: "https://i.pravatar.cc/150?img=3",
+  institution: {
+    name: "Online University",
+    domain: "online.edu",
+  },
+  createdAt: new Date(),
+  lastLogin: new Date()
+};
+
+// Sample course data (in a real app, this would come from an API)
+const sampleCourses: Course[] = [
+  {
+    id: "course-1",
+    code: "CS101",
+    title: "Introduction to Computer Science",
+    description: "An introductory course to the fundamental concepts of computer science.",
+    institution: "Online University",
+    semester: "fall",
+    year: 2025,
+    enrolled: 120,
+    progress: 0.2,
+    instructors: [
+      {
+        name: "Dr. Alan Turing",
+        email: "alan.turing@online.edu",
+        photoURL: "https://i.pravatar.cc/150?img=11"
+      }
+    ],
+    schedule: {
+      days: ["Monday", "Wednesday", "Friday"],
+      startTime: "9:00 AM",
+      endTime: "10:00 AM",
+      location: "Building A, Room 101"
+    },
+    color: "#2563eb",
+    createdAt: new Date(),
+  },
+  {
+    id: "course-2",
+    code: "MATH201",
+    title: "Calculus II",
+    description: "A continuation of Calculus I, covering integration, series, and applications.",
+    institution: "Online University",
+    semester: "spring",
+    year: 2025,
+    enrolled: 85,
+    progress: 0.1,
+    instructors: [
+      {
+        name: "Dr. Ada Lovelace",
+        email: "ada.lovelace@online.edu",
+        photoURL: "https://i.pravatar.cc/150?img=5"
+      }
+    ],
+    schedule: {
+      days: ["Tuesday", "Thursday"],
+      startTime: "10:30 AM",
+      endTime: "12:00 PM",
+      location: "Building B, Room 202"
+    },
+    color: "#db2777",
+    createdAt: new Date(),
+  }
+];
 
 const Index = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Fetch user and courses data
-        const userData = await fetchCurrentUser();
-        const coursesData = await fetchCourses();
-        
-        setUser(userData);
-        setCourses(coursesData);
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadData();
-  }, []);
+  const [user] = useState<User | null>(sampleUser);
+  const [courses] = useState<Course[]>(sampleCourses);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <AppLayout>
@@ -72,7 +123,7 @@ const Index = () => {
                 </div>
               )}
               
-              {courses.length > 4 && (
+              {courses.length > 0 && (
                 <div className="mt-4 text-center">
                   <Link to="/courses">
                     <Button variant="link">View all {courses.length} courses</Button>
@@ -80,6 +131,9 @@ const Index = () => {
                 </div>
               )}
             </div>
+            
+            {/* AI Tools Card */}
+            <AIToolsCard />
           </div>
           
           {/* Right Column - Tasks */}
