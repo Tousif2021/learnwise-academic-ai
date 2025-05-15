@@ -114,3 +114,18 @@ export interface UserEngagement {
     }[];
   };
 }
+
+// Event types
+export interface EventType {
+  id: string;
+  title: string;
+  type: string;
+  dueDate: Date;
+  description?: string;
+  course?: {
+    id: string;
+    title: string;
+    code: string;
+    color?: string;
+  };
+}
