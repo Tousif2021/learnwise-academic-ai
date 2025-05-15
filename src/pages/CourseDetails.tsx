@@ -7,7 +7,8 @@ import AIDocumentProcessor from "@/components/ai/AIDocumentProcessor";
 import AIToolsCard from "@/components/dashboard/AIToolsCard";
 import { fetchCourseById } from "@/services/mockData";
 import { Course } from "@/types";
-import { Book, Users, Calendar } from "lucide-react";
+import { Book, Calendar } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -30,6 +31,15 @@ const CourseDetails = () => {
 
     loadCourse();
   }, [courseId]);
+
+  // Predict grade based on progress
+  const predictGrade = (progress: number) => {
+    if (progress >= 0.9) return "A";
+    if (progress >= 0.8) return "B";
+    if (progress >= 0.7) return "C";
+    if (progress >= 0.6) return "D";
+    return "F";
+  };
 
   if (isLoading) {
     return (
@@ -89,10 +99,6 @@ const CourseDetails = () => {
                 <span>{course.institution}</span>
               </div>
               <div className="flex items-center gap-1 text-sm">
-                <Users size={14} />
-                <span>{course.enrolled} students</span>
-              </div>
-              <div className="flex items-center gap-1 text-sm">
                 <Calendar size={14} />
                 <span>{course.schedule?.days.join(", ")} at {course.schedule?.startTime}</span>
               </div>
@@ -112,14 +118,52 @@ const CourseDetails = () => {
                 <p>{course.description}</p>
               </CardContent>
             </Card>
+
+            {/* Grade Prediction Card */}
+            {course.progress !== undefined && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Progress & Grade Prediction</CardTitle>
+                  <CardDescription>Based on your current progress in this course</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Course Progress</span>
+                        <span className="font-medium">{Math.round(course.progress * 100)}%</span>
+                      </div>
+                      <Progress value={course.progress * 100} className="h-2" />
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Predicted Grade</p>
+                        <p className="text-lg font-bold mt-1">{predictGrade(course.progress)}</p>
+                      </div>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold ${
+                        course.progress >= 0.8 ? 'bg-green-500' : 
+                        course.progress >= 0.6 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}>
+                        {predictGrade(course.progress)}
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-muted-foreground">
+                      This prediction is based on your current progress and may change as you complete more course materials.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
-            {/* AI Document Processor moved from dashboard to course page */}
+            {/* AI Document Processor */}
             <AIDocumentProcessor />
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* AI Tools Card moved from dashboard to course page */}
+            {/* AI Tools Card */}
             <AIToolsCard />
 
             {/* Instructor Information */}

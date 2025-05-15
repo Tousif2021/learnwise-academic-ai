@@ -3,7 +3,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Course } from "@/types";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Users } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 interface CourseCardProps {
   course: Course;
@@ -36,6 +36,15 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
     return `${nextDay} at ${course.schedule.startTime}`;
   };
 
+  // Predict grade based on progress
+  const predictGrade = (progress: number) => {
+    if (progress >= 0.9) return "A";
+    if (progress >= 0.8) return "B";
+    if (progress >= 0.7) return "C";
+    if (progress >= 0.6) return "D";
+    return "F";
+  };
+
   return (
     <Card className="course-card h-full flex flex-col">
       <div 
@@ -62,16 +71,22 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         
         <div className="mt-auto space-y-3">
           {course.progress !== undefined && (
-            <div className="space-y-1">
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-medium">{Math.round(course.progress * 100)}%</span>
+              </div>
               <Progress value={course.progress * 100} className="h-2" />
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Predicted Grade</span>
+                <span className={`font-medium ${course.progress >= 0.8 ? 'text-green-500' : course.progress >= 0.6 ? 'text-yellow-500' : 'text-red-500'}`}>
+                  {predictGrade(course.progress)}
+                </span>
+              </div>
             </div>
           )}
           
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Users size={14} />
-              <span>{course.enrolled} students</span>
-            </div>
+          <div className="flex justify-end text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar size={14} />
               <span>{formatNextClass()}</span>
