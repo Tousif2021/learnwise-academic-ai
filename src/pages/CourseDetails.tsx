@@ -1,15 +1,15 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AIDocumentProcessor from "@/components/ai/AIDocumentProcessor";
 import AIToolsCard from "@/components/dashboard/AIToolsCard";
-import { fetchCourseById, fetchCourseEvents } from "@/services/mockData";
+import { fetchCourseById } from "@/services/mockData";
 import { Course } from "@/types";
-import { Book, Calendar } from "lucide-react";
+import { Book, Calendar, FolderOpen } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import CourseEventsList from "@/components/courses/CourseEventsList";
+import CourseFileOrganizer from "@/components/courses/CourseFileOrganizer";
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -165,7 +165,7 @@ const CourseDetails = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <folder-open size={18} className="text-edu-primary" />
+                  <FolderOpen size={18} className="text-edu-primary" />
                   Course Files
                 </CardTitle>
                 <CardDescription>

@@ -24,7 +24,8 @@ const CourseEventsList: React.FC<CourseEventsListProps> = ({ courseId }) => {
     const loadEvents = async () => {
       try {
         const eventsData = await fetchCourseEvents(courseId);
-        setEvents(eventsData);
+        // Type cast the events to ensure they match the CourseEvent type
+        setEvents(eventsData as CourseEvent[]);
       } catch (error) {
         console.error("Error loading course events:", error);
       } finally {
