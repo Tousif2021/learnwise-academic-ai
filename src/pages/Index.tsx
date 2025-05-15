@@ -4,9 +4,7 @@ import { Link } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import CourseCard from "@/components/dashboard/CourseCard";
-import AIToolsCard from "@/components/dashboard/AIToolsCard";
 import UpcomingTasksCard from "@/components/dashboard/UpcomingTasksCard";
-import AIDocumentProcessor from "@/components/ai/AIDocumentProcessor";
 import { fetchCurrentUser, fetchCourses } from "@/services/mockData";
 import { User, Course } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -80,14 +78,10 @@ const Index = () => {
                 </div>
               )}
             </div>
-            
-            {/* AI Document Processor */}
-            <AIDocumentProcessor />
           </div>
           
-          {/* Right Column - AI Tools and Tasks */}
+          {/* Right Column - Tasks */}
           <div className="space-y-6">
-            <AIToolsCard />
             <UpcomingTasksCard />
           </div>
         </div>
