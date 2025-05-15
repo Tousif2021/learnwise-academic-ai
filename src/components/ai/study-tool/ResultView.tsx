@@ -7,6 +7,7 @@ import FlashcardsContent from "../document-processor/FlashcardsContent";
 import MCQsContent from "../document-processor/MCQsContent";
 import ConceptsContent from "../document-processor/ConceptsContent";
 import { AIContent } from "@/types";
+import { Tabs } from "@/components/ui/tabs";
 
 interface ResultViewProps {
   file: File | null;
