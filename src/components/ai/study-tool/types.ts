@@ -1,7 +1,4 @@
-
-import { ReactElement } from "react";
-
-export type ToolType = "summary" | "flashcards" | "mcqs" | "concepts";
+export type ToolType = "summary" | "flashcards" | "mcqs" | "concepts" | "explain";
 
 export interface ToolOption {
   id: ToolType;

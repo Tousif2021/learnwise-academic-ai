@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIContent } from "@/types";
@@ -6,6 +5,8 @@ import {
   BookOpen, 
   FileQuestion, 
   Key, 
+  Brain,
+  Upload
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -27,65 +28,90 @@ const AIStudyTool: React.FC = () => {
   const tools: ToolOption[] = [
     {
       id: "summary",
-      name: "Summarizer",
-      description: "Generate a concise summary of your document",
+      name: "Lecture Summarizer",
+      description: "Generate a concise summary with key points from your lecture notes or materials",
       icon: BookOpen
     },
     {
       id: "flashcards",
       name: "Flashcard Generator",
-      description: "Create study flashcards from your document",
+      description: "Create study flashcards automatically from your materials",
       icon: FileQuestion
     },
     {
       id: "mcqs",
-      name: "Quiz Creator",
-      description: "Generate quiz questions based on the document",
+      name: "Quiz Generator",
+      description: "Generate practice questions to test your knowledge",
       icon: FileQuestion
     },
     {
       id: "concepts",
       name: "Key Concepts",
-      description: "Extract important concepts and definitions",
+      description: "Extract and explain important concepts from your materials",
       icon: Key
+    },
+    {
+      id: "explain",
+      name: "AI Tutor",
+      description: "Get detailed explanations and examples for complex topics",
+      icon: Brain
     }
   ];
 
-  const resetContent = () => {
-    setAiContent(null);
-    setSelectedTool(null);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      
+      // File validation
+      const fileSize = selectedFile.size / 1024 / 1024; // in MB
+      if (fileSize > 10) {
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 10MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check file type
+      const fileType = selectedFile.type;
+      const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+      if (!validTypes.includes(fileType) && !selectedFile.name.endsWith('.pdf') && !selectedFile.name.endsWith('.docx') && !selectedFile.name.endsWith('.txt')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF, DOCX, or TXT file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
+      setAiContent(null);
+      toast({
+        title: "File uploaded",
+        description: `${selectedFile.name} has been added.`,
+      });
+    }
   };
 
-  const resetAll = () => {
-    setFile(null);
-    setAiContent(null);
-    setSelectedTool(null);
-  };
-  
   const extractFileContent = async (file: File): Promise<string> => {
-    // In a real application, you would use a library to extract text from PDFs or DOCXs
-    // For this demo, we'll create some sample content based on file name or read text files directly
-    
     return new Promise((resolve) => {
       const reader = new FileReader();
       
       reader.onload = (e) => {
         if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-          // If it's a text file, we can read the actual content
           resolve(e.target?.result as string);
         } else {
-          // For other file types, we'd simulate extracted content
           const fileName = file.name.toLowerCase();
           let content = "";
           
           if (fileName.includes("machine") || fileName.includes("ai")) {
             content = "This document discusses various machine learning algorithms and their applications in modern AI systems. It covers supervised and unsupervised learning techniques, neural networks, and practical implementations.";
-          } else if (fileName.includes("physics") || fileName.includes("science")) {
+          } else if (fileName.includes("physics")) {
             content = "The document explains fundamental physics concepts including Newton's laws of motion, thermodynamics, and quantum mechanics. It includes mathematical formulas and experimental results.";
-          } else if (fileName.includes("history") || fileName.includes("war")) {
+          } else if (fileName.includes("history")) {
             content = "This historical text analyzes major events of the 20th century including both World Wars, the Cold War period, and their sociopolitical impacts on modern society.";
           } else {
-            // Generic academic content
             content = "This academic document appears to contain educational content with several sections covering theoretical concepts, methodologies, and practical applications. It includes references to research papers and includes both qualitative and quantitative analysis.";
           }
           
@@ -96,30 +122,13 @@ const AIStudyTool: React.FC = () => {
       if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
         reader.readAsText(file);
       } else {
-        // For non-text files, we don't actually read the content
-        // Just trigger the onload handler after a delay to simulate processing
         setTimeout(() => {
           reader.onload({ target: { result: "" } } as any);
         }, 500);
       }
     });
   };
-  
-  // Helper function to determine topic from filename
-  const determineTopicFromFileName = (fileName: string): string => {
-    fileName = fileName.toLowerCase();
-    if (fileName.includes("machine") || fileName.includes("ai")) return "machine learning and artificial intelligence";
-    if (fileName.includes("physics")) return "physics and natural sciences";
-    if (fileName.includes("history")) return "historical events and their impacts";
-    if (fileName.includes("math") || fileName.includes("calculus")) return "mathematics and calculus";
-    if (fileName.includes("programming") || fileName.includes("code")) return "computer programming and software development";
-    if (fileName.includes("biology")) return "biological sciences";
-    if (fileName.includes("chemistry")) return "chemical processes and reactions";
-    if (fileName.includes("psychology")) return "psychological theories and human behavior";
-    return "academic concepts related to your course";
-  };
-  
-  // Generate content based on the file and selected tool
+
   const generateContent = (toolType: ToolType, fileContent: string, fileName: string): AIContent => {
     const topic = determineTopicFromFileName(fileName);
     
@@ -133,138 +142,172 @@ const AIStudyTool: React.FC = () => {
       generatedAt: new Date()
     };
     
-    // Generate summary if needed
     if (toolType === "summary") {
-      // For text files, use the first part of the actual content
       if (fileContent.length > 20) {
         newContent.summary = `${fileContent.substring(0, 150)}... 
         
 This document appears to be about ${topic}. The text contains information on key concepts, methodologies, and practical applications in this field.
 
-Based on the content analysis, this document covers theoretical frameworks as well as practical implementations. It references several important works in the field and provides both historical context and current applications.`;
-      } else {
-        newContent.summary = `This document appears to be about ${topic}. The document contains approximately ${Math.floor(Math.random() * 15) + 5} pages of content covering theoretical frameworks, methodologies, and practical applications.
+Based on the content analysis, this document covers theoretical frameworks as well as practical implementations. It references several important works in the field and provides both historical context and current applications.
 
-Key points include:
-- Introduction to fundamental concepts in ${topic}
-- Analysis of current research and methodologies
-- Practical applications and case studies
-- References to seminal works in the field
+Key Points:
+1. Introduction to fundamental principles of ${topic}
+2. Discussion of current methodologies and best practices
+3. Analysis of practical applications and case studies
+4. Review of recent developments and future trends
 
-The document is structured in a logical progression, starting with basic principles and advancing to more complex topics. Several diagrams and tables are included to illustrate key points.`;
+Learning Objectives:
+- Understand the core concepts of ${topic}
+- Apply theoretical knowledge to practical scenarios
+- Analyze and evaluate different approaches
+- Synthesize information from multiple sources`;
       }
     }
     
-    // Generate flashcards if needed
     if (toolType === "flashcards") {
-      // Generate flashcards relevant to the topic
-      const generalFlashcards = [
-        { 
-          question: `What is the main topic of this document?`, 
-          answer: `The main topic is ${topic}.` 
-        },
-        { 
-          question: `What theoretical framework is primarily discussed?`, 
-          answer: `The document discusses several theoretical frameworks related to ${topic}, with emphasis on fundamental principles and recent developments.` 
-        },
-      ];
-      
-      // Add topic-specific flashcards
-      if (topic.includes("machine learning")) {
-        newContent.flashcards = [
-          ...generalFlashcards,
-          { question: "What is supervised learning?", answer: "A machine learning approach where the model is trained on labeled data, learning to map inputs to known outputs." },
-          { question: "What is the difference between classification and regression?", answer: "Classification predicts discrete class labels or categories, while regression predicts continuous quantity values." },
-          { question: "What is overfitting?", answer: "When a model learns the training data too well, including noise and outliers, which negatively impacts performance on new data." }
-        ];
-      } else if (topic.includes("physics")) {
-        newContent.flashcards = [
-          ...generalFlashcards,
-          { question: "What is Newton's First Law?", answer: "An object at rest stays at rest, and an object in motion stays in motion unless acted upon by an external force." },
-          { question: "What is the Second Law of Thermodynamics?", answer: "The total entropy of an isolated system always increases over time. Heat flows spontaneously from hot to cold objects." },
-          { question: "What is the relationship between energy and mass?", answer: "According to Einstein's equation E=mc², energy (E) equals mass (m) times the speed of light (c) squared." }
-        ];
-      } else {
-        newContent.flashcards = [
-          ...generalFlashcards,
-          { question: "What are the key methodologies discussed in this document?", answer: `The document covers various research methodologies and analytical techniques relevant to ${topic}.` },
-          { question: "What practical applications are mentioned?", answer: `Several practical applications in ${topic} are discussed, including real-world implementations and case studies.` },
-          { question: "What are the limitations mentioned in the current approach?", answer: `The document acknowledges certain limitations in the current approaches to ${topic} and suggests areas for future research.` }
-        ];
-      }
+      newContent.flashcards = generateTopicSpecificFlashcards(topic);
     }
     
-    // Generate MCQs if needed
     if (toolType === "mcqs") {
-      // Generate general questions
-      const generalQuestions = [
-        {
-          question: `Which of the following best describes the focus of this document?`,
-          options: [`Theoretical aspects of ${topic}`, `Practical applications of ${topic}`, `Historical development of ${topic}`, `A comprehensive overview of ${topic}`],
-          correctOption: 3,
-          explanation: `The document provides a comprehensive overview of ${topic}, covering theoretical foundations, practical applications, and relevant methodologies.`
-        }
-      ];
-      
-      // Add topic-specific questions
-      if (topic.includes("machine learning")) {
-        newContent.mcqs = [
-          ...generalQuestions,
-          {
-            question: "Which algorithm is NOT typically used for classification tasks?",
-            options: ["Linear Regression", "Decision Trees", "Support Vector Machines", "Random Forests"],
-            correctOption: 0,
-            explanation: "Linear Regression is typically used for regression tasks to predict continuous values, not for classification tasks which predict discrete categories."
-          },
-          {
-            question: "What does the term 'feature engineering' refer to?",
-            options: ["Designing new machine learning algorithms", "Creating synthetic training data", "Selecting and transforming variables for models", "Testing model performance"],
-            correctOption: 2,
-            explanation: "Feature engineering refers to the process of selecting, transforming, and creating variables (features) to improve model performance."
-          }
-        ];
-      } else {
-        newContent.mcqs = [
-          ...generalQuestions,
-          {
-            question: `Which research methodology is most emphasized in this document?`,
-            options: ["Qualitative analysis", "Quantitative analysis", "Mixed methods approach", "Literature review"],
-            correctOption: 2,
-            explanation: `The document emphasizes a mixed methods approach that combines both qualitative and quantitative analysis techniques for studying ${topic}.`
-          },
-          {
-            question: `According to the document, what is a key challenge in the field of ${topic}?`,
-            options: ["Insufficient funding", "Lack of theoretical frameworks", "Limited practical applications", "Integration of interdisciplinary perspectives"],
-            correctOption: 3,
-            explanation: `The document identifies the integration of interdisciplinary perspectives as a key challenge in advancing knowledge in ${topic}.`
-          }
-        ];
-      }
+      newContent.mcqs = generateTopicSpecificMCQs(topic);
     }
     
-    // Generate key concepts if needed
     if (toolType === "concepts") {
-      // Generate concepts based on the topic
-      if (topic.includes("machine learning")) {
-        newContent.keyConcepts = [
-          { concept: "Supervised Learning", description: "A machine learning paradigm where models are trained on labeled data to learn mapping functions from inputs to outputs." },
-          { concept: "Neural Networks", description: "Computing systems inspired by biological neural networks, consisting of interconnected nodes or 'neurons' that can learn from data." },
-          { concept: "Overfitting", description: "When a model learns the training data too well, capturing noise and resulting in poor performance on new, unseen data." },
-          { concept: "Feature Engineering", description: "The process of selecting, transforming, and creating variables to improve machine learning model performance." },
-          { concept: "Cross-Validation", description: "A resampling technique used to evaluate machine learning models on limited data samples by splitting data into training and testing sets." }
-        ];
-      } else {
-        newContent.keyConcepts = [
-          { concept: "Theoretical Framework", description: `The foundational structure of concepts, theories, and references that supports research and understanding in ${topic}.` },
-          { concept: "Methodology", description: `Systematic approaches and techniques used to conduct research and analysis in the field of ${topic}.` },
-          { concept: "Practical Application", description: `The implementation of theoretical knowledge in real-world scenarios related to ${topic}.` },
-          { concept: "Critical Analysis", description: "The process of systematically evaluating information, arguments, and claims through careful examination of available evidence." },
-          { concept: "Interdisciplinary Approach", description: `Combining knowledge and methods from different disciplines to address complex problems in ${topic}.` }
-        ];
-      }
+      newContent.keyConcepts = generateTopicSpecificConcepts(topic);
+    }
+    
+    if (toolType === "explain") {
+      newContent.summary = generateDetailedExplanation(topic);
     }
     
     return newContent;
+  };
+
+  const determineTopicFromFileName = (fileName: string): string => {
+    fileName = fileName.toLowerCase();
+    if (fileName.includes("machine") || fileName.includes("ai")) return "machine learning and artificial intelligence";
+    if (fileName.includes("physics")) return "physics and natural sciences";
+    if (fileName.includes("history")) return "historical events and their impacts";
+    if (fileName.includes("math") || fileName.includes("calculus")) return "mathematics and calculus";
+    if (fileName.includes("programming") || fileName.includes("code")) return "computer programming and software development";
+    return "academic concepts related to your course";
+  };
+
+  const generateTopicSpecificFlashcards = (topic: string) => {
+    if (topic.includes("machine learning")) {
+      return [
+        { question: "What is supervised learning?", answer: "A machine learning approach where the model is trained on labeled data, learning to map inputs to known outputs." },
+        { question: "Explain the concept of overfitting", answer: "When a model learns the training data too well, including noise and outliers, which negatively impacts performance on new data." },
+        { question: "What is gradient descent?", answer: "An optimization algorithm used to minimize the loss function by iteratively adjusting model parameters in the direction of steepest descent." },
+        { question: "Define cross-validation", answer: "A technique to assess model performance by splitting data into multiple training and validation sets." },
+        { question: "What is the difference between bias and variance?", answer: "Bias is error from incorrect assumptions in the model, while variance is error from sensitivity to small fluctuations in the training set." }
+      ];
+    }
+    
+    return [
+      { question: `What are the key principles of ${topic}?`, answer: `The key principles include fundamental concepts, methodologies, and practical applications.` },
+      { question: "How is theoretical knowledge applied in practice?", answer: "Through case studies, experiments, and real-world applications." },
+      { question: "What are the current trends in this field?", answer: "Recent developments include technological advances, new methodologies, and emerging applications." }
+    ];
+  };
+
+  const generateTopicSpecificMCQs = (topic: string) => {
+    if (topic.includes("machine learning")) {
+      return [
+        {
+          question: "Which of the following is NOT a type of machine learning?",
+          options: ["Supervised Learning", "Unsupervised Learning", "Determined Learning", "Reinforcement Learning"],
+          correctOption: 2,
+          explanation: "Determined Learning is not a type of machine learning. The main types are Supervised, Unsupervised, and Reinforcement Learning."
+        },
+        {
+          question: "What is the purpose of the training set in machine learning?",
+          options: [
+            "To test the final model performance",
+            "To validate model hyperparameters",
+            "To train the model and learn patterns",
+            "To deploy the model in production"
+          ],
+          correctOption: 2,
+          explanation: "The training set is used to train the model by learning patterns and relationships in the data."
+        }
+      ];
+    }
+    
+    return [
+      {
+        question: `Which aspect is most fundamental to ${topic}?`,
+        options: ["Theoretical Framework", "Practical Applications", "Historical Context", "Future Developments"],
+        correctOption: 0,
+        explanation: "The theoretical framework provides the foundation for understanding and applying concepts in this field."
+      }
+    ];
+  };
+
+  const generateTopicSpecificConcepts = (topic: string) => {
+    if (topic.includes("machine learning")) {
+      return [
+        { concept: "Neural Networks", description: "Computing systems inspired by biological neural networks, consisting of interconnected nodes that process and transmit information." },
+        { concept: "Deep Learning", description: "A subset of machine learning using multiple layers of neural networks to learn hierarchical representations of data." },
+        { concept: "Feature Engineering", description: "The process of selecting, transforming, and creating variables to improve machine learning model performance." },
+        { concept: "Model Evaluation", description: "Techniques and metrics used to assess the performance and generalization ability of machine learning models." }
+      ];
+    }
+    
+    return [
+      { concept: "Fundamental Principles", description: `The core concepts and theories that form the foundation of ${topic}.` },
+      { concept: "Methodology", description: "Systematic approaches and techniques used in the field." },
+      { concept: "Applications", description: "Practical implementations and real-world uses of theoretical knowledge." }
+    ];
+  };
+
+  const generateDetailedExplanation = (topic: string): string => {
+    if (topic.includes("machine learning")) {
+      return `Let me explain the key concepts in detail:
+
+1. Machine Learning Fundamentals
+   - Machine learning is a subset of artificial intelligence that enables systems to learn from data
+   - Instead of explicit programming, models learn patterns and relationships automatically
+   - The quality and quantity of training data significantly impact model performance
+
+2. Types of Machine Learning
+   - Supervised Learning: Learning from labeled data (e.g., classification, regression)
+   - Unsupervised Learning: Finding patterns in unlabeled data (e.g., clustering)
+   - Reinforcement Learning: Learning through interaction with an environment
+
+3. Common Algorithms and Their Applications
+   - Linear Regression: Predicting continuous values
+   - Decision Trees: Making hierarchical decisions
+   - Neural Networks: Complex pattern recognition
+   - Support Vector Machines: Classification and regression
+
+4. Best Practices and Considerations
+   - Data preprocessing and cleaning
+   - Feature selection and engineering
+   - Model selection and hyperparameter tuning
+   - Cross-validation and performance evaluation
+
+Would you like me to elaborate on any of these points?`;
+    }
+    
+    return `Let me explain the key aspects of ${topic}:
+
+1. Fundamental Concepts
+   - Core theories and principles
+   - Historical development
+   - Current state of the field
+
+2. Practical Applications
+   - Real-world implementations
+   - Case studies and examples
+   - Industry best practices
+
+3. Future Developments
+   - Emerging trends
+   - Research directions
+   - Potential applications
+
+Would you like me to elaborate on any of these points?`;
   };
 
   const processTool = async (toolType: ToolType) => {
@@ -281,14 +324,12 @@ The document is structured in a logical progression, starting with basic princip
     setSelectedTool(toolType);
     
     try {
-      // Extract content from the file
       const fileContent = await extractFileContent(file);
       
       // Ensure minimum processing time for realistic feel
       const processingTime = Math.random() * 1000 + 1000;
       await new Promise(resolve => setTimeout(resolve, processingTime));
       
-      // Generate AI content based on the tool selected and file content
       const newContent = generateContent(toolType, fileContent, file.name);
       setAiContent(newContent);
       
@@ -340,12 +381,23 @@ The document is structured in a logical progression, starting with basic princip
     );
   };
 
+  const resetContent = () => {
+    setAiContent(null);
+    setSelectedTool(null);
+  };
+
+  const resetAll = () => {
+    setFile(null);
+    setAiContent(null);
+    setSelectedTool(null);
+  };
+
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle className="ai-gradient-text">AI Study Tool</CardTitle>
+        <CardTitle className="ai-gradient-text">AI Study Assistant</CardTitle>
         <CardDescription>
-          Upload documents to generate summaries, flashcards, quizzes, and extract key concepts
+          Upload lecture notes or study materials to get AI-powered learning support
         </CardDescription>
       </CardHeader>
       
@@ -357,4 +409,3 @@ The document is structured in a logical progression, starting with basic princip
 };
 
 export default AIStudyTool;
-
