@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
@@ -36,20 +35,18 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           You'll be asked to categorize your files after uploading
         </p>
         
-        <div className="mt-4">
-          <label htmlFor="course-file-upload" className="cursor-pointer">
-            <input 
-              id="course-file-upload" 
-              type="file" 
-              className="absolute inset-0 opacity-0 cursor-pointer sr-only" 
-              onChange={handleFileUpload} 
-              multiple
-              accept=".pdf,.docx,.txt,.pptx"
-            />
-            <Button variant="outline" className="cursor-pointer">
-              Choose Files
-            </Button>
-          </label>
+        <div className="mt-4 relative">
+          <input 
+            id="course-file-upload" 
+            type="file" 
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+            onChange={handleFileUpload} 
+            multiple
+            accept=".pdf,.docx,.txt,.pptx"
+          />
+          <Button variant="outline" className="pointer-events-none">
+            Choose Files
+          </Button>
         </div>
       </div>
     </div>

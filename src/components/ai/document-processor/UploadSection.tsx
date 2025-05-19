@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
@@ -55,18 +54,18 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
         Upload PDF, DOCX, or TXT files to process with our AI tools
       </p>
       
-      <label htmlFor="file-upload">
+      <div className="relative">
         <input
           id="file-upload"
           type="file"
           accept=".pdf,.docx,.txt"
           onChange={onFileUpload}
-          className="hidden"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
-        <Button className="cursor-pointer bg-edu-primary hover:bg-edu-primary/90">
+        <Button className="pointer-events-none bg-edu-primary hover:bg-edu-primary/90">
           Select File
         </Button>
-      </label>
+      </div>
       
       <p className="mt-4 text-xs text-muted-foreground">
         Maximum file size: 10MB
@@ -76,4 +75,3 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
 };
 
 export default UploadSection;
-
