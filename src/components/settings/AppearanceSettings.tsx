@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 interface AppearanceSettingsProps {
   language: string;
@@ -20,6 +21,16 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
   setTheme,
   onSave,
 }) => {
+  const { setTheme: setGlobalTheme } = useTheme();
+
+  const handleThemeChange = (value: string) => {
+    if (value) {
+      setTheme(value);
+      // Also update the global theme immediately
+      setGlobalTheme(value as "light" | "dark" | "system");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -49,9 +60,7 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({
             <ToggleGroup 
               type="single" 
               value={theme}
-              onValueChange={(value) => {
-                if (value) setTheme(value);
-              }}
+              onValueChange={handleThemeChange}
               className="justify-start"
             >
               <ToggleGroupItem value="light">Light</ToggleGroupItem>

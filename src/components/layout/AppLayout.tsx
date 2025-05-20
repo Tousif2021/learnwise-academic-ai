@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { fetchCurrentUser } from "@/services/mockData";
 import { User } from "@/types";
 import { Book, Calendar, Monitor, Settings, User as UserIcon } from "lucide-react";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -95,6 +96,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               {user?.institution?.name || "Academic Management System"}
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Link 
                 to="/settings" 
                 className="bg-edu-secondary/10 text-edu-secondary hover:bg-edu-secondary/20 rounded-full p-1.5 transition-colors"
