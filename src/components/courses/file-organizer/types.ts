@@ -8,4 +8,5 @@ export interface OrganizedFile {
   type: string;
   category: FileCategory;
   uploadDate: Date;
+  url?: string; // Added URL property as optional
 }
