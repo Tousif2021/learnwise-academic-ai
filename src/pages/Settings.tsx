@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,12 +6,21 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Settings2, Bell, Globe, Shield, LogOut } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { getCurrentUser } from "@/services/authService";
+import { getUserPreferences, saveUserPreferences, UserPreferences } from "@/services/userPreferencesService";
+import { signOutUser } from "@/services/authService";
+import { useNavigate } from "react-router-dom";
 
 const SettingsPage = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [reminderNotifications, setReminderNotifications] = useState(false);
@@ -21,20 +29,121 @@ const SettingsPage = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
-  const handleSaveNotificationSettings = () => {
-    // In a real app, this would save to backend
-    toast({
-      title: "Notification settings updated",
-      description: "Your notification preferences have been saved.",
-    });
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setIsLoading(true);
+        const userResult = await getCurrentUser();
+        
+        if (userResult.success && userResult.data) {
+          setUserId(userResult.data.id);
+          
+          // Load user preferences
+          const preferencesResult = await getUserPreferences(userResult.data.id);
+          
+          if (preferencesResult.success && preferencesResult.data) {
+            const prefs = preferencesResult.data;
+            setEmailNotifications(prefs.notifications?.email ?? true);
+            setPushNotifications(prefs.notifications?.push ?? true);
+            setReminderNotifications(prefs.notifications?.reminder ?? false);
+            setLanguage(prefs.language || "english");
+            setTheme(prefs.theme || "system");
+          }
+        } else {
+          // Not logged in or error
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        toast({
+          title: "Error loading settings",
+          description: "Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadUserData();
+  }, [navigate, toast]);
+
+  const handleSaveNotificationSettings = async () => {
+    if (!userId) return;
+    
+    try {
+      const preferences: UserPreferences = {
+        user_id: userId,
+        theme: theme as UserPreferences["theme"],
+        notifications: {
+          email: emailNotifications,
+          push: pushNotifications,
+          reminder: reminderNotifications
+        },
+        language: language as UserPreferences["language"]
+      };
+      
+      const result = await saveUserPreferences(preferences);
+      
+      if (result.success) {
+        toast({
+          title: "Notification settings updated",
+          description: "Your notification preferences have been saved.",
+        });
+      } else {
+        toast({
+          title: "Error saving settings",
+          description: result.error || "Please try again later.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error saving notification settings:", error);
+      toast({
+        title: "Error saving settings",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleSaveRegionalSettings = () => {
-    // In a real app, this would save to backend
-    toast({
-      title: "Regional settings updated",
-      description: "Your language and regional preferences have been saved.",
-    });
+  const handleSaveRegionalSettings = async () => {
+    if (!userId) return;
+    
+    try {
+      const preferences: UserPreferences = {
+        user_id: userId,
+        theme: theme as UserPreferences["theme"],
+        notifications: {
+          email: emailNotifications,
+          push: pushNotifications,
+          reminder: reminderNotifications
+        },
+        language: language as UserPreferences["language"]
+      };
+      
+      const result = await saveUserPreferences(preferences);
+      
+      if (result.success) {
+        toast({
+          title: "Regional settings updated",
+          description: "Your language and regional preferences have been saved.",
+        });
+      } else {
+        toast({
+          title: "Error saving settings",
+          description: result.error || "Please try again later.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error saving regional settings:", error);
+      toast({
+        title: "Error saving settings",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
   
   const handleSaveSecuritySettings = () => {
@@ -45,14 +154,44 @@ const SettingsPage = () => {
     });
   };
 
-  const handleLogout = () => {
-    // In a real app, this would handle logout logic
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
+  const handleLogout = async () => {
+    try {
+      const result = await signOutUser();
+      
+      if (result.success) {
+        toast({
+          title: "Logged out",
+          description: "You have been successfully logged out.",
+        });
+        navigate('/login');
+      } else {
+        toast({
+          title: "Logout failed",
+          description: result.error || "Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast({
+        title: "Logout failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive"
+      });
+    }
     setLogoutDialogOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="h-48 bg-muted animate-pulse rounded-xl mb-6" />
+          <div className="h-64 bg-muted animate-pulse rounded-xl" />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

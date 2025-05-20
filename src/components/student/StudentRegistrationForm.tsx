@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { studentSchema, StudentFormData, registerStudent } from "@/services/studentService";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface StudentRegistrationFormProps {
   userId: string;
@@ -46,6 +45,7 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
   });
   
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { toast } = useToast();
   
   const onSubmit = async (data: StudentFormData) => {
     setIsSubmitting(true);
