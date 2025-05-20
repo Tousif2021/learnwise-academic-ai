@@ -1,8 +1,9 @@
-
-import React from "react";
-import { FileText, Download, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { FileText, Download, Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrganizedFile } from "./types";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FileViewer } from "@/components/ui/file-viewer";
 
 interface FileItemProps {
   file: OrganizedFile;
@@ -11,6 +12,8 @@ interface FileItemProps {
 }
 
 const FileItem: React.FC<FileItemProps> = ({ file, formatFileSize, onDelete }) => {
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   const getFileIcon = () => {
     switch (file.type.toLowerCase()) {
       case "pdf":
@@ -28,7 +31,6 @@ const FileItem: React.FC<FileItemProps> = ({ file, formatFileSize, onDelete }) =
 
   const handleDownload = () => {
     // In a real app, this would download the actual file
-    // For this demo, we'll create a simple text file
     const element = document.createElement("a");
     const fileContent = `This is a simulated download of: ${file.name}`;
     const file1 = new Blob([fileContent], {type: 'text/plain'});
@@ -40,34 +42,59 @@ const FileItem: React.FC<FileItemProps> = ({ file, formatFileSize, onDelete }) =
   };
 
   return (
-    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-      <div className="flex items-center">
-        {getFileIcon()}
-        <div className="ml-3">
-          <p className="text-sm font-medium">{file.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {formatFileSize(file.size)} • Uploaded {file.uploadDate.toLocaleDateString()}
-          </p>
+    <>
+      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+        <div className="flex items-center">
+          {getFileIcon()}
+          <div className="ml-3">
+            <p className="text-sm font-medium">{file.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatFileSize(file.size)} • Uploaded {file.uploadDate.toLocaleDateString()}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={handleDownload} title="Download file">
-          <Download className="h-4 w-4" />
-        </Button>
-        
-        {onDelete && (
+        <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={onDelete}
-            className="text-red-500 hover:text-red-700 hover:bg-red-100"
-            title="Delete file"
+            onClick={() => setPreviewOpen(true)} 
+            title="Preview file"
           >
-            <Trash2 className="h-4 w-4" />
+            <Eye className="h-4 w-4" />
           </Button>
-        )}
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleDownload} 
+            title="Download file"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+          
+          {onDelete && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onDelete}
+              className="text-red-500 hover:text-red-700 hover:bg-red-100"
+              title="Delete file"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-4xl">
+          <FileViewer 
+            file={file.url || file.name} 
+            onClose={() => setPreviewOpen(false)} 
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
