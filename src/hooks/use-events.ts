@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EventType } from "@/types";
+import { isSameMonth } from "date-fns";
 
 // Simulated event data service
 const eventsData: EventType[] = [
@@ -43,7 +44,34 @@ const eventsData: EventType[] = [
     },
     dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
     description: "Discuss progress on the final paper"
-  }
+  },
+  // Add some more events for testing
+  {
+    id: "event4",
+    title: "Physics Lab Report",
+    type: "assignment",
+    course: {
+      id: "course-4",
+      title: "Physics I",
+      code: "PHYS101",
+      color: "#059669",
+    },
+    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+    description: "Submit laboratory report for Experiment #3"
+  },
+  {
+    id: "event5",
+    title: "Study Session",
+    type: "meeting",
+    course: {
+      id: "course-2",
+      title: "Calculus II",
+      code: "MATH201",
+      color: "#db2777",
+    },
+    dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
+    description: "Group study for midterm exam"
+  },
 ];
 
 // Mock API functions
@@ -61,6 +89,17 @@ const fetchEvents = async (params: any = {}) => {
         eventDate.getFullYear() === filterDate.getFullYear() &&
         eventDate.getMonth() === filterDate.getMonth() &&
         eventDate.getDate() === filterDate.getDate()
+      );
+    });
+  }
+
+  // Filter by month and year if provided
+  if (params.month !== undefined && params.year !== undefined) {
+    filteredEvents = filteredEvents.filter(event => {
+      const eventDate = new Date(event.dueDate);
+      return (
+        eventDate.getMonth() === params.month && 
+        eventDate.getFullYear() === params.year
       );
     });
   }

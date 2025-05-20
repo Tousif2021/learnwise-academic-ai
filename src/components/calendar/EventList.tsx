@@ -1,16 +1,20 @@
 
 import React from "react";
 import { useEvents } from "@/hooks/use-events";
-import { Clock, Bookmark } from "lucide-react";
+import { format, isToday, isTomorrow, isThisWeek, isThisMonth } from "date-fns";
+import { Clock, Bookmark, Calendar, CalendarCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface EventListProps {
   date?: Date;
   eventType?: string;
   limit?: number;
+  month?: number;
+  year?: number;
 }
 
-const EventList: React.FC<EventListProps> = ({ date, eventType, limit }) => {
-  const { data: events, isLoading } = useEvents({ date, type: eventType, limit });
+const EventList: React.FC<EventListProps> = ({ date, eventType, limit, month, year }) => {
+  const { data: events, isLoading } = useEvents({ date, type: eventType, limit, month, year });
   
   if (isLoading) {
     return (
@@ -25,49 +29,87 @@ const EventList: React.FC<EventListProps> = ({ date, eventType, limit }) => {
   if (!events || events.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
+        <Calendar className="h-12 w-12 mx-auto mb-3 opacity-20" />
         <p>No events scheduled for this {date ? 'date' : 'period'}</p>
       </div>
     );
   }
   
+  // Group events by date
+  const groupedEvents: Record<string, typeof events> = {};
+  
+  events.forEach(event => {
+    const eventDate = new Date(event.dueDate);
+    const dateKey = format(eventDate, 'yyyy-MM-dd');
+    
+    if (!groupedEvents[dateKey]) {
+      groupedEvents[dateKey] = [];
+    }
+    
+    groupedEvents[dateKey].push(event);
+  });
+  
   return (
-    <div className="space-y-3">
-      {events.map((event) => (
-        <div 
-          key={event.id}
-          className="flex items-center p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-        >
-          <div 
-            className="w-1.5 h-12 rounded mr-3"
-            style={{ backgroundColor: event.course?.color || "#6d28d9" }}
-          />
-          
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="font-medium text-sm">{event.title}</h4>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${getEventTypeBadgeStyle(event.type)}`}>
-                {formatEventType(event.type)}
-              </span>
+    <div className="space-y-5">
+      {Object.entries(groupedEvents).map(([dateKey, dateEvents]) => {
+        const eventDate = new Date(dateEvents[0].dueDate);
+        const isDateToday = isToday(eventDate);
+        const isDateTomorrow = isTomorrow(eventDate);
+        
+        return (
+          <div key={dateKey}>
+            <div className="flex items-center gap-2 mb-2">
+              {isDateToday ? (
+                <Badge variant="default" className="rounded-full px-2 py-0.5 text-[10px]">TODAY</Badge>
+              ) : isDateTomorrow ? (
+                <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-[10px]">TOMORROW</Badge>
+              ) : null}
+              <h4 className={`text-sm font-medium ${isDateToday ? 'text-primary' : ''}`}>
+                {formatDateGroupHeader(eventDate)}
+              </h4>
             </div>
             
-            <div className="flex items-center gap-4">
-              {event.course && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Bookmark size={12} />
-                  {event.course.code || event.course.title}
-                </span>
-              )}
-              
-              <div className="flex items-center text-xs">
-                <Clock size={12} className="mr-1" />
-                <span className="text-muted-foreground">
-                  {formatEventTime(event.dueDate)}
-                </span>
-              </div>
+            <div className="space-y-2">
+              {dateEvents.map((event) => (
+                <div 
+                  key={event.id}
+                  className="flex items-center p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors border border-border/30"
+                >
+                  <div 
+                    className="w-1.5 h-12 rounded-full mr-3"
+                    style={{ backgroundColor: event.course?.color || "#6d28d9" }}
+                  />
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-sm">{event.title}</h4>
+                      <Badge variant="outline" className={`text-xs ${getEventTypeBadgeStyle(event.type)}`}>
+                        {formatEventType(event.type)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                      {event.course && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Bookmark size={12} />
+                          {event.course.code || event.course.title}
+                        </span>
+                      )}
+                      
+                      <div className="flex items-center text-xs">
+                        <Clock size={12} className="mr-1" />
+                        <span className="text-muted-foreground">
+                          {format(new Date(event.dueDate), 'h:mm a')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
@@ -92,17 +134,21 @@ const formatEventType = (type: string) => {
   return type.charAt(0).toUpperCase() + type.slice(1);
 };
 
-const formatEventTime = (date: Date) => {
-  const now = new Date();
-  const today = new Date(now.setHours(0, 0, 0, 0));
-  const eventDate = new Date(date);
-  const diffTime = eventDate.getTime() - today.getTime();
-  const diffDays = diffTime / (1000 * 60 * 60 * 24);
-  
-  if (diffDays === 0) return `Today at ${eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  if (diffDays === 1) return `Tomorrow at ${eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  if (diffDays > 1 && diffDays < 7) return `${eventDate.toLocaleDateString([], { weekday: 'long' })} at ${eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  return eventDate.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const formatDateGroupHeader = (date: Date) => {
+  if (isToday(date)) {
+    return 'Today';
+  } else if (isTomorrow(date)) {
+    return 'Tomorrow';
+  } else if (isThisWeek(date)) {
+    // For this week, display the day name
+    return format(date, 'EEEE');
+  } else if (isThisMonth(date)) {
+    // For this month, display the day and date
+    return format(date, 'EEEE, MMMM d');
+  } else {
+    // For other dates, display the full date
+    return format(date, 'MMMM d, yyyy');
+  }
 };
 
 export default EventList;

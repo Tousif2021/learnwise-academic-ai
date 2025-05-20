@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,13 +59,15 @@ interface AddEventDialogProps {
   onOpenChange: (open: boolean) => void;
   courses: Course[];
   preselectedCourseId?: string;
+  preselectedDate?: Date;
 }
 
 const AddEventDialog: React.FC<AddEventDialogProps> = ({ 
   open, 
   onOpenChange, 
   courses,
-  preselectedCourseId 
+  preselectedCourseId,
+  preselectedDate
 }) => {
   const { addEvent, isAdding } = useAddEvent();
   
@@ -74,7 +77,7 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({
       title: "",
       type: "assignment",
       courseId: preselectedCourseId || "",
-      dueDate: new Date(),
+      dueDate: preselectedDate || new Date(),
       time: format(new Date(), "HH:mm"),
       description: "",
     },
@@ -119,12 +122,18 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({
     }
   };
   
-  // Initialize the form with preselected course when the dialog opens
-  React.useEffect(() => {
-    if (open && preselectedCourseId) {
-      form.setValue('courseId', preselectedCourseId);
+  // Initialize the form with preselected data when the dialog opens
+  useEffect(() => {
+    if (open) {
+      if (preselectedCourseId) {
+        form.setValue('courseId', preselectedCourseId);
+      }
+      
+      if (preselectedDate) {
+        form.setValue('dueDate', preselectedDate);
+      }
     }
-  }, [open, preselectedCourseId, form]);
+  }, [open, preselectedCourseId, preselectedDate, form]);
   
   const eventTypes = [
     { value: "assignment", label: "Assignment" },
@@ -137,11 +146,28 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({
     { value: "other", label: "Other" },
   ];
   
+  const getColorForEventType = (type: string) => {
+    const colors: Record<string, string> = {
+      "assignment": "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+      "quiz": "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+      "exam": "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+      "meeting": "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300",
+      "lecture": "bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-300",
+      "lab": "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+      "project": "bg-pink-100 text-pink-600 dark:bg-pink-900 dark:text-pink-300",
+      "other": "bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-300",
+    };
+    return colors[type] || colors.other;
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Event</DialogTitle>
+          <DialogTitle className="text-xl">Add New Event</DialogTitle>
+          <DialogDescription>
+            Create an event for your academic calendar
+          </DialogDescription>
         </DialogHeader>
         
         <Form {...form}>
@@ -175,7 +201,11 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({
                       </FormControl>
                       <SelectContent>
                         {eventTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem 
+                            key={type.value} 
+                            value={type.value}
+                            className={getColorForEventType(type.value)}
+                          >
                             {type.label}
                           </SelectItem>
                         ))}
@@ -200,8 +230,18 @@ const AddEventDialog: React.FC<AddEventDialogProps> = ({
                       </FormControl>
                       <SelectContent>
                         {courses.map((course) => (
-                          <SelectItem key={course.id} value={course.id}>
-                            {course.code} - {course.title}
+                          <SelectItem 
+                            key={course.id} 
+                            value={course.id}
+                            className="flex items-center gap-2"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: course.color }}
+                              ></div>
+                              {course.code} - {course.title}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
