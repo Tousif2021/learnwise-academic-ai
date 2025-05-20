@@ -1,4 +1,4 @@
-import { summarizeDocument } from "./OpenAI";
+import { summarizeDocument, generateFlashcards, generateMCQs } from "./OpenAI";
 // ... (other imports)
 
 const handleProcess = async () => {
@@ -13,14 +13,20 @@ const handleProcess = async () => {
     // Use OpenAI for summary
     const summary = await summarizeDocument(fileContent);
 
-    // For now, use your canned flashcard/mcq logic, or add more AI calls later
-    const newAiContent: AIContent = {
+    // Get AI-generated flashcards and MCQs
+    const flashcards = await generateFlashcards(fileContent);
+    const mcqs = await generateMCQs(fileContent);
+    
+    // Generate key concepts from summary
+    const keyConcepts = generateKeyConcepts(summary, file.name);
+
+    const newAiContent = {
       id: `ai-content-${Date.now()}`,
       courseContentId: `content-${Date.now()}`,
       summary,
-      flashcards: generateFlashcards(fileContent, file.name),
-      mcqs: generateMCQs(fileContent, file.name),
-      keyConcepts: generateKeyConcepts(fileContent, file.name),
+      flashcards,
+      mcqs,
+      keyConcepts,
       generatedAt: new Date()
     };
 
@@ -40,4 +46,16 @@ const handleProcess = async () => {
   } finally {
     setIsProcessing(false);
   }
+};
+
+// Helper function to extract key concepts (used until we implement AI-generated ones)
+const generateKeyConcepts = (summaryText: string, fileName: string) => {
+  const lines = summaryText.split('.');
+  return lines
+    .filter(line => line.trim().length > 20)
+    .slice(0, 5)
+    .map(line => ({
+      concept: line.trim(),
+      details: `Detail for ${line.trim().substring(0, 30)}...`
+    }));
 };

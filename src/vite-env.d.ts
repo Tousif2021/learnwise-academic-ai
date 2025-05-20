@@ -1,1 +1,10 @@
-OPENAI_API_KEY=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
+
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_OPENAI_API_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
