@@ -29,8 +29,13 @@ export const registerStudent = async (studentData: StudentFormData) => {
     const validatedData = studentSchema.parse(studentData);
     
     // Prepare data with sync fields
+    // Ensure required fields are present
     const newStudent: StudentInsert = {
       ...validatedData,
+      email: validatedData.email,        // Explicitly include required fields
+      first_name: validatedData.first_name,
+      last_name: validatedData.last_name,
+      user_id: validatedData.user_id,
       sync_status: 'pending',
       last_synced: getServerTimestamp(),
     };

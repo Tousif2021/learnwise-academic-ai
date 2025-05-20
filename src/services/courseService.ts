@@ -30,8 +30,18 @@ export const addCourse = async (courseData: CourseFormData) => {
     const validatedData = courseSchema.parse(courseData);
     
     // Prepare data with sync fields
+    // Ensure required fields are present
     const newCourse: CourseInsert = {
-      ...validatedData,
+      code: validatedData.code,            // Explicitly include required fields
+      title: validatedData.title,
+      description: validatedData.description,
+      semester: validatedData.semester,
+      year: validatedData.year,
+      institution: validatedData.institution,
+      department: validatedData.department,
+      credits: validatedData.credits,
+      color: validatedData.color,
+      cover_image_url: validatedData.cover_image_url,
       sync_status: 'pending',
       last_synced: getServerTimestamp(),
     };
