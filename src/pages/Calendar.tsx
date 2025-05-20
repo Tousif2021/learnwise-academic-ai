@@ -142,12 +142,6 @@ const CalendarPage: React.FC = () => {
                         position: "relative",
                       }
                     }}
-                    styles={{
-                      day_hasEvent: {
-                        fontWeight: "bold",
-                        position: "relative",
-                      }
-                    }}
                   />
                 </div>
                 
