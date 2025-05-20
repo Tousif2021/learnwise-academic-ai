@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -128,4 +129,17 @@
   .wise-input {
     @apply rounded-xl border-2 border-gray-100 focus:border-primary focus:ring-0 transition-colors duration-200;
   }
+}
+
+/* Calendar day with event marker */
+.rdp-day_hasEvent::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
 }

@@ -132,7 +132,7 @@ const CalendarPage: React.FC = () => {
                     selected={date}
                     onSelect={handleDateSelect}
                     month={viewDate}
-                    className="rounded-md"
+                    className="rounded-md w-full"
                     modifiers={{
                       hasEvent: monthEvents?.map(e => new Date(e.dueDate)) || [],
                     }}
@@ -140,17 +140,12 @@ const CalendarPage: React.FC = () => {
                       hasEvent: { 
                         fontWeight: "bold",
                         position: "relative",
-                        "::after": {
-                          content: "''",
-                          position: "absolute",
-                          width: "5px",
-                          height: "5px",
-                          borderRadius: "50%",
-                          background: "var(--accent)",
-                          bottom: "2px",
-                          left: "50%",
-                          transform: "translateX(-50%)"
-                        }
+                      }
+                    }}
+                    styles={{
+                      day_hasEvent: {
+                        fontWeight: "bold",
+                        position: "relative",
                       }
                     }}
                   />
