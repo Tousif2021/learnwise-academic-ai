@@ -1,7 +1,5 @@
-
 import { supabase, getServerTimestamp } from '@/lib/supabase';
 import type { CourseInsert, StudentCourseInsert } from '@/types/supabase';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 // Course validation schema
@@ -30,9 +28,8 @@ export const addCourse = async (courseData: CourseFormData) => {
     const validatedData = courseSchema.parse(courseData);
     
     // Prepare data with sync fields
-    // Ensure required fields are present
     const newCourse: CourseInsert = {
-      code: validatedData.code,            // Explicitly include required fields
+      code: validatedData.code,
       title: validatedData.title,
       description: validatedData.description,
       semester: validatedData.semester,

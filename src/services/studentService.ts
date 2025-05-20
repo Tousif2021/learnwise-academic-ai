@@ -1,7 +1,6 @@
 
 import { supabase, getServerTimestamp } from '@/lib/supabase';
 import type { StudentInsert } from '@/types/supabase';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
 // Student validation schema
@@ -29,12 +28,15 @@ export const registerStudent = async (studentData: StudentFormData) => {
     const validatedData = studentSchema.parse(studentData);
     
     // Prepare data with sync fields
-    // Ensure required fields are present
     const newStudent: StudentInsert = {
-      ...validatedData,
-      email: validatedData.email,        // Explicitly include required fields
+      email: validatedData.email,
       first_name: validatedData.first_name,
       last_name: validatedData.last_name,
+      student_id: validatedData.student_id,
+      institution: validatedData.institution,
+      department: validatedData.department,
+      graduation_year: validatedData.graduation_year,
+      academic_level: validatedData.academic_level,
       user_id: validatedData.user_id,
       sync_status: 'pending',
       last_synced: getServerTimestamp(),

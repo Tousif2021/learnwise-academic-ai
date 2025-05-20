@@ -40,6 +40,8 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
       institution: "",
       student_id: "",
       user_id: userId,
+      academic_level: undefined,
+      graduation_year: undefined,
     }
   });
   
@@ -90,7 +92,7 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
               <FormItem>
                 <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John" {...field} />
+                  <Input placeholder="Enter your first name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,7 +106,7 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Doe" {...field} />
+                  <Input placeholder="Enter your last name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -120,7 +122,7 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="john.doe@university.edu" 
+                  placeholder="your.email@example.com" 
                   type="email"
                   {...field} 
                 />
@@ -137,7 +139,7 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
             <FormItem>
               <FormLabel>Student ID (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="S12345678" {...field} />
+                <Input placeholder="Enter your student ID" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -151,7 +153,7 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
             <FormItem>
               <FormLabel>Institution (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="University Name" {...field} />
+                <Input placeholder="Enter your institution name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
