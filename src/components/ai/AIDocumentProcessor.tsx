@@ -1,54 +1,68 @@
 
 import React, { useState } from "react";
-import { summarizeDocument, generateFlashcards, generateMCQs } from "./OpenAI";
 import { Card, CardContent } from "@/components/ui/card";
 import { AIContent } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import UploadSection from "./document-processor/UploadSection";
 import FilePreview from "./document-processor/FilePreview";
 import ProcessedDocumentView from "./document-processor/ProcessedDocumentView";
-import UploadSection from "./document-processor/UploadSection";
+import { extractFileContent, processDocumentWithAI, uploadDocument, askDocumentQuestion } from "@/services/aiDocumentService";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2, Search } from "lucide-react";
 
-const AIDocumentProcessor: React.FC = () => {
+const questionSchema = z.object({
+  question: z.string().min(3, "Question is too short"),
+});
+
+interface AIDocumentProcessorProps {
+  studentId?: string;
+  courseId?: string;
+}
+
+const AIDocumentProcessor: React.FC<AIDocumentProcessorProps> = ({ 
+  studentId = "default-student", 
+  courseId 
+}) => {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiContent, setAiContent] = useState<AIContent | null>(null);
   const [activeTab, setActiveTab] = useState("summary");
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [askDialogOpen, setAskDialogOpen] = useState(false);
+  const [isAsking, setIsAsking] = useState(false);
+  const [answer, setAnswer] = useState<string | null>(null);
+  
   const { toast } = useToast();
   
-  const extractFileContent = async (file: File): Promise<string> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-          resolve(e.target?.result as string);
-        } else {
-          // For non-text files, we'll use a simulation for demo purposes
-          const fileName = file.name.toLowerCase();
-          let content = "";
-          
-          if (fileName.includes("machine") || fileName.includes("ai")) {
-            content = "This document discusses various machine learning algorithms and their applications in modern AI systems. It covers supervised and unsupervised learning techniques, neural networks, and real-world case studies.";
-          } else if (fileName.includes("physics")) {
-            content = "The document explains fundamental physics concepts including Newton's laws of motion, thermodynamics, and quantum mechanics. It includes mathematical formulas and experimental results.";
-          } else if (fileName.includes("history")) {
-            content = "This historical text analyzes major events of the 20th century including both World Wars, the Cold War period, and their sociopolitical impacts on modern society.";
-          } else {
-            content = "This academic document appears to contain educational content with several sections covering theoretical concepts, methodologies, and practical applications. It includes references and illustrations.";
-          }
-          
-          resolve(content);
-        }
-      };
-      
-      if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-        reader.readAsText(file);
-      } else {
-        setTimeout(() => {
-          reader.onload({ target: { result: "" } } as any);
-        }, 500);
-      }
-    });
+  const questionForm = useForm<{ question: string }>({
+    resolver: zodResolver(questionSchema),
+    defaultValues: {
+      question: "",
+    },
+  });
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setAiContent(null);
+      setDocumentId(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setFile(e.dataTransfer.files[0]);
+      setAiContent(null);
+      setDocumentId(null);
+    }
   };
 
   const handleProcess = async () => {
@@ -57,30 +71,48 @@ const AIDocumentProcessor: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      const startTime = Date.now();
-      const fileContent = await extractFileContent(file);
-
-      // Use OpenAI for summary
-      const summary = await summarizeDocument(fileContent);
-
-      // Get AI-generated flashcards and MCQs
-      const flashcards = await generateFlashcards(fileContent);
-      const mcqs = await generateMCQs(fileContent);
+      // Upload document to Supabase
+      const uploadResult = await uploadDocument(
+        file,
+        studentId,
+        courseId
+      );
       
-      // Generate key concepts from summary
-      const keyConcepts = generateKeyConcepts(summary, file.name);
-
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || "Failed to upload document");
+      }
+      
+      // Store document ID for later use (e.g., asking questions)
+      setDocumentId(uploadResult.data.id);
+      
+      // Extract content from file
+      const fileContent = await extractFileContent(file);
+      
+      // Process with OpenAI and store in Supabase
+      const processingResult = await processDocumentWithAI(
+        uploadResult.data.id,
+        fileContent
+      );
+      
+      if (!processingResult.success) {
+        throw new Error(processingResult.error || "Failed to process document");
+      }
+      
+      // Format content for display
+      const { data } = processingResult;
       const newAiContent: AIContent = {
-        id: `ai-content-${Date.now()}`,
-        courseContentId: `content-${Date.now()}`,
-        summary,
-        flashcards,
-        mcqs,
-        keyConcepts: keyConcepts.map(item => ({
-          concept: item.concept,
-          description: item.details // Changed from details to description to match the AIContent type
-        })),
-        generatedAt: new Date()
+        id: data.id,
+        courseContentId: data.document_id,
+        summary: data.summary,
+        flashcards: data.flashcards,
+        mcqs: data.mcqs,
+        keyConcepts: Array.isArray(data.key_concepts) 
+          ? data.key_concepts.map((item: any) => ({
+              concept: item.concept,
+              description: item.description
+            }))
+          : [],
+        generatedAt: new Date(data.created_at)
       };
 
       setAiContent(newAiContent);
@@ -93,7 +125,7 @@ const AIDocumentProcessor: React.FC = () => {
       console.error("Error processing document:", error);
       toast({
         title: "Processing failed",
-        description: "There was an error processing your document.",
+        description: error instanceof Error ? error.message : "There was an error processing your document.",
         variant: "destructive",
       });
     } finally {
@@ -101,38 +133,42 @@ const AIDocumentProcessor: React.FC = () => {
     }
   };
 
-  // Helper function to extract key concepts
-  const generateKeyConcepts = (summaryText: string, fileName: string) => {
-    const lines = summaryText.split('.');
-    return lines
-      .filter(line => line.trim().length > 20)
-      .slice(0, 5)
-      .map(line => ({
-        concept: line.trim(),
-        details: `Detail for ${line.trim().substring(0, 30)}...`
-      }));
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setAiContent(null);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFile(e.dataTransfer.files[0]);
-      setAiContent(null);
-    }
-  };
-
   const handleNewUpload = () => {
     setFile(null);
     setAiContent(null);
     setActiveTab("summary");
+    setDocumentId(null);
+    setAnswer(null);
+  };
+  
+  const handleAskQuestion = async (data: { question: string }) => {
+    if (!documentId) return;
+    
+    setIsAsking(true);
+    setAnswer(null);
+    
+    try {
+      const result = await askDocumentQuestion(documentId, data.question);
+      
+      if (result.success) {
+        setAnswer(result.data.answer);
+      } else {
+        toast({
+          title: "Failed to answer question",
+          description: result.error || "An error occurred",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error asking question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process your question",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAsking(false);
+    }
   };
 
   return (
@@ -141,6 +177,7 @@ const AIDocumentProcessor: React.FC = () => {
         {!file && (
           <UploadSection 
             onFileUpload={handleFileUpload}
+            onDrop={handleDrop}
           />
         )}
         
@@ -153,14 +190,81 @@ const AIDocumentProcessor: React.FC = () => {
         )}
         
         {file && aiContent && (
-          <ProcessedDocumentView
-            file={file}
-            aiContent={aiContent}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onNewUpload={handleNewUpload}
-          />
+          <>
+            <ProcessedDocumentView
+              file={file}
+              aiContent={aiContent}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onNewUpload={handleNewUpload}
+            />
+            
+            {documentId && (
+              <div className="mt-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full flex gap-2 items-center"
+                  onClick={() => setAskDialogOpen(true)}
+                >
+                  <Search size={16} />
+                  Ask a question about this document
+                </Button>
+              </div>
+            )}
+          </>
         )}
+        
+        <Dialog open={askDialogOpen} onOpenChange={setAskDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Ask about this document</DialogTitle>
+            </DialogHeader>
+            
+            <Form {...questionForm}>
+              <form 
+                onSubmit={questionForm.handleSubmit(handleAskQuestion)}
+                className="space-y-4 mt-4"
+              >
+                <FormField
+                  control={questionForm.control}
+                  name="question"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input 
+                          placeholder="What is the main thesis of this document?"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <Button 
+                  type="submit"
+                  disabled={isAsking}
+                  className="w-full"
+                >
+                  {isAsking ? (
+                    <>
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Ask Question"
+                  )}
+                </Button>
+              </form>
+            </Form>
+            
+            {answer && (
+              <div className="mt-4 bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm font-medium mb-2">Answer:</p>
+                <p className="text-sm whitespace-pre-wrap">{answer}</p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
