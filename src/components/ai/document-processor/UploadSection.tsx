@@ -1,12 +1,17 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
 interface UploadSectionProps {
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDrop?: (e: React.DragEvent) => void; // Make onDrop optional
 }
 
-const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
+const UploadSection: React.FC<UploadSectionProps> = ({ 
+  onFileUpload,
+  onDrop 
+}) => {
   const [dragActive, setDragActive] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -23,7 +28,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFileUpload }) => {
     e.preventDefault();
     setDragActive(false);
     
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    if (onDrop) {
+      onDrop(e);
+    } else if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) {
         const dataTransfer = new DataTransfer();

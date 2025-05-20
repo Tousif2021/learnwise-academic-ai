@@ -70,13 +70,16 @@ const AIDocumentProcessor: React.FC = () => {
       // Generate key concepts from summary
       const keyConcepts = generateKeyConcepts(summary, file.name);
 
-      const newAiContent = {
+      const newAiContent: AIContent = {
         id: `ai-content-${Date.now()}`,
         courseContentId: `content-${Date.now()}`,
         summary,
         flashcards,
         mcqs,
-        keyConcepts,
+        keyConcepts: keyConcepts.map(item => ({
+          concept: item.concept,
+          description: item.details // Changed from details to description to match the AIContent type
+        })),
         generatedAt: new Date()
       };
 
@@ -138,7 +141,6 @@ const AIDocumentProcessor: React.FC = () => {
         {!file && (
           <UploadSection 
             onFileUpload={handleFileUpload}
-            onDrop={handleDrop}
           />
         )}
         
