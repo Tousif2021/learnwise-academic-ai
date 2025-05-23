@@ -93,22 +93,28 @@ export const registerStudent = async (studentData: StudentFormData) => {
  */
 export const getStudentByUserId = async (userId: string) => {
   try {
+    // First try to get all matching records
     const { data, error } = await supabase
       .from('students')
       .select('*')
-      .eq('user_id', userId)
-      .single();
+      .eq('user_id', userId);
     
     if (error) {
-      if (error.code === 'PGRST116') {
-        return { success: true, data: null };
-      }
       throw new Error(`Error fetching student: ${error.message}`);
     }
-    
+
+    // If no records found, return null
+    if (!data || data.length === 0) {
+      return {
+        success: true,
+        data: null
+      };
+    }
+
+    // If records found, return the first one
     return {
       success: true,
-      data,
+      data: data[0]
     };
   } catch (error) {
     console.error('Failed to fetch student:', error);
