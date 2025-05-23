@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AIStudyTool from "@/components/ai/AIStudyTool";
 import CourseNotes from "@/components/courses/CourseNotes";
 import { Course } from "@/types";
-import { Book, Calendar, FolderOpen, Brain, FileText, HelpCircle, TrendingUp, User } from "lucide-react";
+import { Book, Calendar, FolderOpen, Brain, FileText, User } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import CourseEventsList from "@/components/courses/CourseEventsList";
 import CourseFileOrganizer from "@/components/courses/CourseFileOrganizer";
@@ -75,18 +75,6 @@ const CourseDetails = () => {
     );
   }
 
-  const aiToolIcons = {
-    summarizer: FileText,
-    flashcards: Brain,
-    quiz_maker: HelpCircle,
-  };
-
-  const aiToolLabels = {
-    summarizer: "AI Summarizer",
-    flashcards: "Flashcard Maker", 
-    quiz_maker: "Quiz Maker",
-  };
-
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto p-6">
@@ -138,92 +126,36 @@ const CourseDetails = () => {
         </div>
 
         {/* Course Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="ai-tools">AI Tools</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
-            <TabsTrigger value="files">Files</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
+        <Tabs defaultValue="ai-tools" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="ai-tools" className="flex items-center gap-2">
+              <Brain size={16} />
+              AI Tools
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="flex items-center gap-2">
+              <FileText size={16} />
+              Notes
+            </TabsTrigger>
+            <TabsTrigger value="files" className="flex items-center gap-2">
+              <FolderOpen size={16} />
+              Files
+            </TabsTrigger>
+            <TabsTrigger value="events" className="flex items-center gap-2">
+              <Calendar size={16} />
+              Events
+            </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* AI Tools Available */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain size={18} className="text-edu-primary" />
-                    Available AI Tools
-                  </CardTitle>
-                  <CardDescription>
-                    AI tools enabled for this course
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {(course as any).settings?.aiTools?.length > 0 ? (
-                    <div className="grid gap-3">
-                      {(course as any).settings.aiTools.map((tool: string) => {
-                        const Icon = aiToolIcons[tool as keyof typeof aiToolIcons];
-                        return (
-                          <div key={tool} className="flex items-center gap-3 p-3 border rounded-lg">
-                            <Icon size={20} className="text-edu-primary" />
-                            <span className="font-medium">{aiToolLabels[tool as keyof typeof aiToolLabels]}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No AI tools enabled for this course</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Course Features */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FolderOpen size={18} className="text-edu-primary" />
-                    Course Features
-                  </CardTitle>
-                  <CardDescription>
-                    Enabled features for this course
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp size={16} />
-                      <span>Grade Predictor</span>
-                    </div>
-                    <Badge variant={(course as any).settings?.enableGradePredictor ? "default" : "secondary"}>
-                      {(course as any).settings?.enableGradePredictor ? "Enabled" : "Disabled"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText size={16} />
-                      <span>Note Taking</span>
-                    </div>
-                    <Badge variant={(course as any).settings?.enableNoteTaking ? "default" : "secondary"}>
-                      {(course as any).settings?.enableNoteTaking ? "Enabled" : "Disabled"}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
 
           <TabsContent value="ai-tools">
             {(course as any).settings?.aiTools?.length > 0 ? (
               <AIStudyTool />
             ) : (
-              <Card>
+              <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center p-12">
                   <Brain size={48} className="text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">No AI tools enabled</h3>
                   <p className="text-muted-foreground text-center">
-                    AI tools were not enabled for this course during creation.
+                    AI tools were not enabled for this course during creation. You can still use the general AI tools from the dashboard.
                   </p>
                 </CardContent>
               </Card>
@@ -234,7 +166,7 @@ const CourseDetails = () => {
             {(course as any).settings?.enableNoteTaking ? (
               <CourseNotes courseId={course.id} />
             ) : (
-              <Card>
+              <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center p-12">
                   <FileText size={48} className="text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">Note taking disabled</h3>
@@ -251,7 +183,16 @@ const CourseDetails = () => {
           </TabsContent>
 
           <TabsContent value="events">
-            <CourseEventsList courseId={course.id} />
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Course Events</h3>
+                  <p className="text-sm text-muted-foreground">Manage assignments, quizzes, and important dates</p>
+                </div>
+                <AddCourseEventButton courseId={course.id} />
+              </div>
+              <CourseEventsList courseId={course.id} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
