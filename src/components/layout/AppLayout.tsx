@@ -1,8 +1,7 @@
-
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
