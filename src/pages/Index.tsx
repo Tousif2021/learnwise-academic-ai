@@ -7,6 +7,7 @@ import EnhancedCourseCard from "@/components/dashboard/EnhancedCourseCard";
 import InteractiveUpcomingTasksCard from "@/components/dashboard/InteractiveUpcomingTasksCard";
 import MotivationalQuotesCard from "@/components/dashboard/MotivationalQuotesCard";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Plus } from "lucide-react";
 import AIToolsCard from "@/components/dashboard/AIToolsCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,7 +23,7 @@ const fetchUserCoursesFromLocalStorage = async () => {
 const Index = () => {
   const { user } = useAuth();
 
-  const { data: currentUser, isLoading: userLoading } = useQuery({
+  const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     enabled: !!user,
@@ -32,8 +33,6 @@ const Index = () => {
     queryKey: ['userCourses'],
     queryFn: fetchUserCoursesFromLocalStorage,
   });
-
-  const isLoading = userLoading || coursesLoading;
 
   return (
     <AppLayout>
@@ -57,10 +56,10 @@ const Index = () => {
                 </Button>
               </div>
               
-              {isLoading ? (
+              {coursesLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="h-64 bg-muted rounded-xl animate-pulse"></div>
+                    <Skeleton key={i} className="h-64 rounded-xl" />
                   ))}
                 </div>
               ) : (
@@ -70,7 +69,7 @@ const Index = () => {
                       <EnhancedCourseCard course={course} />
                     </Link>
                   ))}
-                  {courses.length === 0 && !isLoading && (
+                  {courses.length === 0 && (
                     <div className="col-span-2 text-center py-12 text-muted-foreground">
                       <p className="mb-4">No courses enrolled yet</p>
                       <Button className="hover:scale-105 transition-transform" asChild>
