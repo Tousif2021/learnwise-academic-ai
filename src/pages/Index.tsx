@@ -11,7 +11,14 @@ import AIToolsCard from "@/components/dashboard/AIToolsCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCurrentUser } from "@/services/userDataService";
-import { fetchUserCourses } from "@/services/courseDataService";
+
+// Updated fetch function to get courses from localStorage
+const fetchUserCoursesFromLocalStorage = async () => {
+  await new Promise(resolve => setTimeout(resolve, 200)); // Simulate loading
+  
+  const storedCourses = JSON.parse(localStorage.getItem('user_courses') || '[]');
+  return storedCourses;
+};
 
 const Index = () => {
   const { user } = useAuth();
@@ -23,9 +30,8 @@ const Index = () => {
   });
 
   const { data: courses = [], isLoading: coursesLoading } = useQuery({
-    queryKey: ['userCourses', user?.id],
-    queryFn: () => user ? fetchUserCourses(user.id) : Promise.resolve([]),
-    enabled: !!user,
+    queryKey: ['userCourses'],
+    queryFn: fetchUserCoursesFromLocalStorage,
   });
 
   const isLoading = userLoading || coursesLoading;
@@ -45,7 +51,7 @@ const Index = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">My Courses</h2>
                 <Button size="sm" variant="outline" className="gap-1" asChild>
-                  <Link to="/courses">
+                  <Link to="/courses/add">
                     <Plus size={16} />
                     <span>Add Course</span>
                   </Link>
@@ -69,7 +75,7 @@ const Index = () => {
                     <div className="col-span-2 text-center py-12 text-muted-foreground">
                       <p className="mb-4">No courses enrolled yet</p>
                       <Button asChild>
-                        <Link to="/courses">Browse Courses</Link>
+                        <Link to="/courses/add">Add Your First Course</Link>
                       </Button>
                     </div>
                   )}
