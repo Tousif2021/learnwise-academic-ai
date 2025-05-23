@@ -1,23 +1,14 @@
 
-import React, { useEffect, useState } from "react";
-import { fetchCourseEvents } from "@/services/mockData";
+import React from "react";
 import { Clock } from "lucide-react";
 import { useEvents } from "@/hooks/use-events";
-
-interface CourseEvent {
-  id: string;
-  title: string;
-  type: "assignment" | "quiz" | "exam" | "lecture" | "lab";
-  dueDate: Date;
-  description?: string;
-}
 
 interface CourseEventsListProps {
   courseId: string;
 }
 
 const CourseEventsList: React.FC<CourseEventsListProps> = ({ courseId }) => {
-  const { data: events, isLoading } = useEvents({ courseId });
+  const { data: allEvents, isLoading } = useEvents();
 
   // Format due date to relative time (e.g., "2 days left")
   const formatDueDate = (date: Date) => {
@@ -60,7 +51,10 @@ const CourseEventsList: React.FC<CourseEventsListProps> = ({ courseId }) => {
     );
   }
 
-  if (!events || events.length === 0) {
+  // Filter events for this specific course
+  const courseEvents = allEvents?.filter(event => event.course?.id === courseId) || [];
+
+  if (courseEvents.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>No upcoming events for this course</p>
@@ -70,7 +64,7 @@ const CourseEventsList: React.FC<CourseEventsListProps> = ({ courseId }) => {
 
   return (
     <div className="space-y-3">
-      {events.filter(event => event.course?.id === courseId).map((event) => (
+      {courseEvents.map((event) => (
         <div 
           key={event.id}
           className="flex items-center p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
@@ -91,7 +85,7 @@ const CourseEventsList: React.FC<CourseEventsListProps> = ({ courseId }) => {
               <div className="flex items-center text-xs">
                 <Clock size={12} className="mr-1" />
                 <span className="text-muted-foreground">
-                  {formatDueDate(event.dueDate)}
+                  {formatDueDate(new Date(event.dueDate))}
                 </span>
               </div>
             </div>
