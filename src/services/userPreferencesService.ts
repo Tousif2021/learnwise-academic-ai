@@ -19,11 +19,41 @@ export const preferencesSchema = z.object({
 export type UserPreferences = z.infer<typeof preferencesSchema>;
 
 /**
+ * Ensure user profile exists before saving preferences
+ */
+const ensureUserProfile = async (userId: string) => {
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single();
+
+  if (profileError && profileError.code === 'PGRST116') {
+    // Create profile if it doesn't exist
+    const { error: createError } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        language_preference: 'en'
+      });
+
+    if (createError) {
+      throw new Error(`Error creating profile: ${createError.message}`);
+    }
+  } else if (profileError) {
+    throw new Error(`Error checking profile: ${profileError.message}`);
+  }
+};
+
+/**
  * Save user preferences to Supabase
  */
 export const saveUserPreferences = async (preferences: UserPreferences) => {
   try {
     const validatedData = preferencesSchema.parse(preferences);
+
+    // Ensure profile exists before saving preferences
+    await ensureUserProfile(validatedData.user_id);
 
     const { data, error } = await supabase
       .from('user_preferences')
@@ -58,6 +88,9 @@ export const saveUserPreferences = async (preferences: UserPreferences) => {
  */
 export const getUserPreferences = async (userId: string) => {
   try {
+    // Ensure profile exists before getting preferences
+    await ensureUserProfile(userId);
+
     const { data, error } = await supabase
       .from('user_preferences')
       .select('*')
