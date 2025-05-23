@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -119,7 +120,24 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
       },
+      animationDelay: {
+        '2000': '2s',
+        '4000': '4s',
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.animation-delay-2000': {
+          'animation-delay': '2s',
+        },
+        '.animation-delay-4000': {
+          'animation-delay': '4s',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 } satisfies Config;
