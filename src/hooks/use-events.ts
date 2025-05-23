@@ -4,124 +4,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { EventType } from "@/types";
 import { isSameMonth } from "date-fns";
 
-// Simulated event data service
-const eventsData: EventType[] = [
-  {
-    id: "event1",
-    title: "Linear Regression Assignment",
-    type: "assignment",
-    course: {
-      id: "course-1",
-      title: "Introduction to Computer Science",
-      code: "CS101",
-      color: "#2563eb",
-    },
-    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-    description: "Complete problems 1-5 from Chapter 4"
-  },
-  {
-    id: "event2",
-    title: "Midterm Exam",
-    type: "exam",
-    course: {
-      id: "course-2",
-      title: "Calculus II",
-      code: "MATH201",
-      color: "#db2777",
-    },
-    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-    description: "Covers Chapters 1-5"
-  },
-  {
-    id: "event3",
-    title: "Group Project Meeting",
-    type: "meeting",
-    course: {
-      id: "course-3",
-      title: "College Writing",
-      code: "ENG102",
-      color: "#6d28d9",
-    },
-    dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-    description: "Discuss progress on the final paper"
-  },
-  // Add some more events for testing
-  {
-    id: "event4",
-    title: "Physics Lab Report",
-    type: "assignment",
-    course: {
-      id: "course-4",
-      title: "Physics I",
-      code: "PHYS101",
-      color: "#059669",
-    },
-    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-    description: "Submit laboratory report for Experiment #3"
-  },
-  {
-    id: "event5",
-    title: "Study Session",
-    type: "meeting",
-    course: {
-      id: "course-2",
-      title: "Calculus II",
-      code: "MATH201",
-      color: "#db2777",
-    },
-    dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
-    description: "Group study for midterm exam"
-  },
-];
+// Empty events data - users need to create their own events
+const eventsData: EventType[] = [];
 
 // Mock API functions
 const fetchEvents = async (params: any = {}) => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
   
-  let filteredEvents = [...eventsData];
-  
-  // Filter by date if provided
-  if (params.date) {
-    const filterDate = new Date(params.date);
-    filteredEvents = filteredEvents.filter(event => {
-      const eventDate = new Date(event.dueDate);
-      return (
-        eventDate.getFullYear() === filterDate.getFullYear() &&
-        eventDate.getMonth() === filterDate.getMonth() &&
-        eventDate.getDate() === filterDate.getDate()
-      );
-    });
-  }
-
-  // Filter by month and year if provided
-  if (params.month !== undefined && params.year !== undefined) {
-    filteredEvents = filteredEvents.filter(event => {
-      const eventDate = new Date(event.dueDate);
-      return (
-        eventDate.getMonth() === params.month && 
-        eventDate.getFullYear() === params.year
-      );
-    });
-  }
-  
-  // Filter by type if provided
-  if (params.type) {
-    filteredEvents = filteredEvents.filter(event => event.type === params.type);
-  }
-
-  // Filter by courseId if provided
-  if (params.courseId) {
-    filteredEvents = filteredEvents.filter(event => 
-      event.course && event.course.id === params.courseId
-    );
-  }
-  
-  // Limit results if specified
-  if (params.limit && params.limit > 0) {
-    filteredEvents = filteredEvents.slice(0, params.limit);
-  }
-  
-  return filteredEvents;
+  // Return empty array - users need to add their own events
+  return [];
 };
 
 const addEventToApi = async (event: Omit<EventType, "id">) => {
