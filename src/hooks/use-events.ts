@@ -62,6 +62,17 @@ const addEventToApi = async (event: Omit<EventType, "id">) => {
   return newEvent;
 };
 
+const completeTaskApi = async (eventId: string) => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  const storedEvents = JSON.parse(localStorage.getItem('user_events') || '[]');
+  const filteredEvents = storedEvents.filter((event: EventType) => event.id !== eventId);
+  
+  localStorage.setItem('user_events', JSON.stringify(filteredEvents));
+  
+  return eventId;
+};
+
 // Hooks
 export const useEvents = (params: any = {}) => {
   return useQuery({
@@ -109,4 +120,22 @@ export const useAddEvent = () => {
   };
   
   return { addEvent, isAdding };
+};
+
+export const useCompleteTask = () => {
+  const queryClient = useQueryClient();
+  
+  const mutation = useMutation({
+    mutationFn: completeTaskApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['upcomingEvents'] });
+    }
+  });
+  
+  const completeTask = async (eventId: string) => {
+    await mutation.mutateAsync(eventId);
+  };
+  
+  return { completeTask };
 };

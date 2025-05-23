@@ -1,9 +1,11 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import WelcomeCard from "@/components/dashboard/WelcomeCard";
-import CourseCard from "@/components/dashboard/CourseCard";
-import UpcomingTasksCard from "@/components/dashboard/UpcomingTasksCard";
+import EnhancedCourseCard from "@/components/dashboard/EnhancedCourseCard";
+import InteractiveUpcomingTasksCard from "@/components/dashboard/InteractiveUpcomingTasksCard";
+import MotivationalQuotesCard from "@/components/dashboard/MotivationalQuotesCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import AIToolsCard from "@/components/dashboard/AIToolsCard";
@@ -47,7 +49,7 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">My Courses</h2>
-                <Button size="sm" variant="outline" className="gap-1" asChild>
+                <Button size="sm" variant="outline" className="gap-1 hover:scale-105 transition-transform" asChild>
                   <Link to="/courses/add">
                     <Plus size={16} />
                     <span>Add Course</span>
@@ -65,13 +67,13 @@ const Index = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courses.slice(0, 4).map((course) => (
                     <Link to={`/courses/${course.id}`} key={course.id}>
-                      <CourseCard course={course} />
+                      <EnhancedCourseCard course={course} />
                     </Link>
                   ))}
                   {courses.length === 0 && !isLoading && (
                     <div className="col-span-2 text-center py-12 text-muted-foreground">
                       <p className="mb-4">No courses enrolled yet</p>
-                      <Button asChild>
+                      <Button className="hover:scale-105 transition-transform" asChild>
                         <Link to="/courses/add">Add Your First Course</Link>
                       </Button>
                     </div>
@@ -82,7 +84,9 @@ const Index = () => {
               {courses.length > 4 && (
                 <div className="mt-4 text-center">
                   <Link to="/courses">
-                    <Button variant="link">View all {courses.length} courses</Button>
+                    <Button variant="link" className="hover:scale-105 transition-transform">
+                      View all {courses.length} courses
+                    </Button>
                   </Link>
                 </div>
               )}
@@ -92,9 +96,10 @@ const Index = () => {
             <AIToolsCard />
           </div>
           
-          {/* Right Column - Tasks */}
+          {/* Right Column - Tasks and Motivation */}
           <div className="space-y-6">
-            <UpcomingTasksCard />
+            <InteractiveUpcomingTasksCard />
+            <MotivationalQuotesCard />
           </div>
         </div>
       </div>
