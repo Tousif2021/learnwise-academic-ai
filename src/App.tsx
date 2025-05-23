@@ -12,6 +12,7 @@ import { toast } from "@/components/ui/use-toast";
 import Index from "./pages/Index";
 import CourseDetails from "./pages/CourseDetails";
 import Courses from "./pages/Courses";
+import AddCourse from "./pages/AddCourse";
 import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -76,6 +77,11 @@ const App = () => {
                 <Route path="/courses" element={
                   <ProtectedRoute>
                     <Courses />
+                  </ProtectedRoute>
+                } />
+                <Route path="/courses/add" element={
+                  <ProtectedRoute>
+                    <AddCourse />
                   </ProtectedRoute>
                 } />
                 <Route path="/courses/:courseId" element={
