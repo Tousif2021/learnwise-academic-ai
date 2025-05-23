@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
@@ -14,8 +13,6 @@ import { fetchCurrentUser } from "@/services/userDataService";
 
 // Updated fetch function to get courses from localStorage
 const fetchUserCoursesFromLocalStorage = async () => {
-  await new Promise(resolve => setTimeout(resolve, 200)); // Simulate loading
-  
   const storedCourses = JSON.parse(localStorage.getItem('user_courses') || '[]');
   return storedCourses;
 };
