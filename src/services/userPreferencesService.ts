@@ -1,4 +1,3 @@
-
 import { supabase, getServerTimestamp } from '@/lib/supabase';
 import { z } from 'zod';
 
@@ -6,7 +5,7 @@ import { z } from 'zod';
 export const preferencesSchema = z.object({
   user_id: z.string().uuid(),
   theme: z.enum(['light', 'dark', 'system']).default('system'),
-  notifications: z.object({
+  notification_preferences: z.object({
     email: z.boolean().default(true),
     push: z.boolean().default(true),
     reminder: z.boolean().default(false)
@@ -14,8 +13,7 @@ export const preferencesSchema = z.object({
     email: true,
     push: true,
     reminder: false
-  }),
-  language: z.enum(['english', 'spanish', 'french']).default('english')
+  })
 });
 
 export type UserPreferences = z.infer<typeof preferencesSchema>;
@@ -32,8 +30,7 @@ export const saveUserPreferences = async (preferences: UserPreferences) => {
       .upsert({
         user_id: validatedData.user_id,
         theme: validatedData.theme,
-        notifications: validatedData.notifications,
-        language: validatedData.language,
+        notification_preferences: validatedData.notification_preferences,
         updated_at: getServerTimestamp()
       })
       .select()
@@ -68,13 +65,40 @@ export const getUserPreferences = async (userId: string) => {
       .single();
 
     if (error) {
+      // If no preferences found, create default preferences
       if (error.code === 'PGRST116') {
-        // No preferences found, return defaults
+        const defaultPreferences = preferencesSchema.parse({
+          user_id: userId,
+          theme: 'system',
+          notification_preferences: {
+            email: true,
+            push: true,
+            reminder: false
+          }
+        });
+
+        // Save default preferences
+        const { data: savedData, error: saveError } = await supabase
+          .from('user_preferences')
+          .insert(defaultPreferences)
+          .select()
+          .single();
+
+        if (saveError) {
+          console.error('Error saving default preferences:', saveError);
+          // Even if save fails, return default preferences
+          return {
+            success: true,
+            data: defaultPreferences
+          };
+        }
+
         return {
           success: true,
-          data: preferencesSchema.parse({ user_id: userId })
+          data: savedData
         };
       }
+      
       throw new Error(`Error fetching preferences: ${error.message}`);
     }
 
