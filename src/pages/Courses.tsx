@@ -2,10 +2,9 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Plus } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import CourseCard from "@/components/dashboard/CourseCard";
-import { fetchCourses } from "@/services/mockData";
 import { Course } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,14 +22,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 type SortOption = "newest" | "alphabetical" | "progress";
 type SemesterOption = "all" | "fall" | "spring" | "summer" | "winter";
 
+// Updated fetch function to get courses from localStorage
+const fetchUserCourses = async (): Promise<Course[]> => {
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
+  
+  const storedCourses = JSON.parse(localStorage.getItem('user_courses') || '[]');
+  return storedCourses;
+};
+
 const Courses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [semester, setSemester] = useState<SemesterOption>("all");
   
   const { data: courses = [], isLoading } = useQuery({
-    queryKey: ['courses'],
-    queryFn: fetchCourses
+    queryKey: ['user-courses'],
+    queryFn: fetchUserCourses
   });
   
   // Filter courses based on search term and semester
@@ -68,8 +75,11 @@ const Courses = () => {
               Browse and manage all your enrolled courses
             </p>
           </div>
-          <Button size="sm">
-            Join New Course
+          <Button size="sm" asChild>
+            <Link to="/courses/add">
+              <Plus size={16} className="mr-1" />
+              Add New Course
+            </Link>
           </Button>
         </div>
         
@@ -145,10 +155,20 @@ const Courses = () => {
           </div>
         ) : (
           <div className="text-center py-20">
-            <h3 className="text-lg font-medium">No courses found</h3>
+            <h3 className="text-lg font-medium">
+              {searchTerm ? "No courses found" : "No courses yet"}
+            </h3>
             <p className="text-muted-foreground mt-1">
-              {searchTerm ? "Try a different search term" : "Join a course to get started"}
+              {searchTerm ? "Try a different search term" : "Create your first course to get started"}
             </p>
+            {!searchTerm && (
+              <Button className="mt-4" asChild>
+                <Link to="/courses/add">
+                  <Plus size={16} className="mr-1" />
+                  Add Your First Course
+                </Link>
+              </Button>
+            )}
           </div>
         )}
       </div>

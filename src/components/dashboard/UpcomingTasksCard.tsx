@@ -28,7 +28,7 @@ const UpcomingTasksCard: React.FC = () => {
             Add courses and events to see your upcoming tasks here
           </p>
           <Button size="sm" asChild>
-            <Link to="/courses">
+            <Link to="/courses/add">
               <Plus size={16} className="mr-1" />
               Add Your First Course
             </Link>
