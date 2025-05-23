@@ -1,95 +1,40 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import CourseCard from "@/components/dashboard/CourseCard";
 import UpcomingTasksCard from "@/components/dashboard/UpcomingTasksCard";
-import { User, Course } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import AIToolsCard from "@/components/dashboard/AIToolsCard";
-
-// Sample user data (in a real app, this would come from authentication)
-const sampleUser: User = {
-  id: "user-1",
-  displayName: "Guest User",
-  email: "guest@example.com",
-  photoURL: "https://i.pravatar.cc/150?img=3",
-  institution: {
-    name: "Online University",
-    domain: "online.edu",
-  },
-  createdAt: new Date(),
-  lastLogin: new Date()
-};
-
-// Sample course data (in a real app, this would come from an API)
-const sampleCourses: Course[] = [
-  {
-    id: "course-1",
-    code: "CS101",
-    title: "Introduction to Computer Science",
-    description: "An introductory course to the fundamental concepts of computer science.",
-    institution: "Online University",
-    semester: "fall",
-    year: 2025,
-    enrolled: 120,
-    progress: 0.2,
-    instructors: [
-      {
-        name: "Dr. Alan Turing",
-        email: "alan.turing@online.edu",
-        photoURL: "https://i.pravatar.cc/150?img=11"
-      }
-    ],
-    schedule: {
-      days: ["Monday", "Wednesday", "Friday"],
-      startTime: "9:00 AM",
-      endTime: "10:00 AM",
-      location: "Building A, Room 101"
-    },
-    color: "#2563eb",
-    createdAt: new Date(),
-  },
-  {
-    id: "course-2",
-    code: "MATH201",
-    title: "Calculus II",
-    description: "A continuation of Calculus I, covering integration, series, and applications.",
-    institution: "Online University",
-    semester: "spring",
-    year: 2025,
-    enrolled: 85,
-    progress: 0.1,
-    instructors: [
-      {
-        name: "Dr. Ada Lovelace",
-        email: "ada.lovelace@online.edu",
-        photoURL: "https://i.pravatar.cc/150?img=5"
-      }
-    ],
-    schedule: {
-      days: ["Tuesday", "Thursday"],
-      startTime: "10:30 AM",
-      endTime: "12:00 PM",
-      location: "Building B, Room 202"
-    },
-    color: "#db2777",
-    createdAt: new Date(),
-  }
-];
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCurrentUser } from "@/services/userDataService";
+import { fetchUserCourses } from "@/services/courseDataService";
 
 const Index = () => {
-  const [user] = useState<User | null>(sampleUser);
-  const [courses] = useState<Course[]>(sampleCourses);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: fetchCurrentUser,
+    enabled: !!user,
+  });
+
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ['userCourses', user?.id],
+    queryFn: () => user ? fetchUserCourses(user.id) : Promise.resolve([]),
+    enabled: !!user,
+  });
+
+  const isLoading = userLoading || coursesLoading;
 
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
-        <WelcomeCard user={user} />
+        <WelcomeCard user={currentUser} />
         
         {/* Main Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -120,10 +65,18 @@ const Index = () => {
                       <CourseCard course={course} />
                     </Link>
                   ))}
+                  {courses.length === 0 && !isLoading && (
+                    <div className="col-span-2 text-center py-12 text-muted-foreground">
+                      <p className="mb-4">No courses enrolled yet</p>
+                      <Button asChild>
+                        <Link to="/courses">Browse Courses</Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
               
-              {courses.length > 0 && (
+              {courses.length > 4 && (
                 <div className="mt-4 text-center">
                   <Link to="/courses">
                     <Button variant="link">View all {courses.length} courses</Button>
