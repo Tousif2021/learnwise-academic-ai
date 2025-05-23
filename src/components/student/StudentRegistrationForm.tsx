@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { studentSchema, StudentFormData, registerStudent } from "@/services/studentService";
+import { registerStudentFallback } from "@/services/fallbackStudentService";
 import { useToast } from "@/hooks/use-toast";
 
 interface StudentRegistrationFormProps {
@@ -51,7 +53,24 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({
     setIsSubmitting(true);
     
     try {
-      const result = await registerStudent(data);
+      // Try the main Supabase service first
+      let result = await registerStudent(data);
+      
+      // If it fails due to database issues, use fallback
+      if (!result.success && (
+        result.error?.includes('table does not exist') ||
+        result.error?.includes('table not found') ||
+        result.error?.includes('Database error')
+      )) {
+        console.log('Main registration failed, using fallback service');
+        toast({
+          title: "Using offline mode",
+          description: "Database not available, storing data locally",
+          variant: "default",
+        });
+        
+        result = await registerStudentFallback(data);
+      }
       
       if (result.success) {
         toast({

@@ -1,4 +1,3 @@
-
 import { supabase, getServerTimestamp } from '@/lib/supabase';
 import type { StudentInsert } from '@/types/supabase';
 import { z } from 'zod';
@@ -27,6 +26,8 @@ export const registerStudent = async (studentData: StudentFormData) => {
     // Validate student data
     const validatedData = studentSchema.parse(studentData);
     
+    console.log('Attempting to register student:', validatedData);
+    
     // Prepare data with sync fields
     const newStudent: StudentInsert = {
       email: validatedData.email,
@@ -49,8 +50,21 @@ export const registerStudent = async (studentData: StudentFormData) => {
       .single();
     
     if (error) {
-      throw new Error(`Error registering student: ${error.message}`);
+      console.error('Supabase error details:', error);
+      
+      // Handle specific error cases
+      if (error.code === '42P01') {
+        throw new Error('Students table does not exist. Please set up your database schema first.');
+      }
+      
+      if (error.code === 'PGRST301') {
+        throw new Error('Students table not found. Please create the students table in your Supabase database.');
+      }
+      
+      throw new Error(`Database error: ${error.message || error.details || 'Unknown database error'}`);
     }
+    
+    console.log('Student registered successfully:', data);
     
     return {
       success: true,
@@ -58,6 +72,14 @@ export const registerStudent = async (studentData: StudentFormData) => {
     };
   } catch (error) {
     console.error('Student registration failed:', error);
+    
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: `Validation error: ${error.errors.map(e => e.message).join(', ')}`,
+      };
+    }
+    
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
