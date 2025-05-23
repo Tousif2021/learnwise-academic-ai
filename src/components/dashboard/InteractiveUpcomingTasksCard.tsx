@@ -96,7 +96,14 @@ const InteractiveUpcomingTasksCard: React.FC = () => {
       return a.type.localeCompare(b.type);
     });
 
-  const eventTypes = [...new Set(upcomingEvents.map(event => event.type))];
+  // Extract unique event types with proper typing
+  const eventTypes: string[] = Array.from(
+    new Set(
+      upcomingEvents
+        .map(event => event.type)
+        .filter((type): type is string => typeof type === 'string' && type.length > 0)
+    )
+  );
 
   return (
     <Card className="hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -123,7 +130,7 @@ const InteractiveUpcomingTasksCard: React.FC = () => {
               <DropdownMenuItem onClick={() => setFilter("all")}>
                 All Tasks
               </DropdownMenuItem>
-              {eventTypes.map(type => (
+              {eventTypes.map((type: string) => (
                 <DropdownMenuItem key={type} onClick={() => setFilter(type)}>
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </DropdownMenuItem>
